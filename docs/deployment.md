@@ -3,12 +3,12 @@
 This document describes how the Sasscout backend is deployed behind a
 TLS-terminating reverse proxy, and the security model that protects it.
 
-> **Status note:** Everything in this file under **IMPLEMENTED** is real, tested
-> code/configuration in the repository. Everything under **CONFIGURED BUT NOT
-> LIVE-VERIFIED** is written and coherent but was not exercised against a real
-> public TLS deployment in the local environment (no proxy binary, no public
-> domain/certificate, and no running Docker daemon were available at the time of
-> writing). Sections under **NOT_AVAILABLE** could not be verified here.
+> **Status note:** Everything under **IMPLEMENTED** / **VALIDATED** is real code
+> or configuration in the repository, and the **VALIDATED** items were exercised
+> here (Docker build + runtime and a local end-to-end HTTPS test behind a Caddy
+> reverse proxy with a self-signed certificate — STEP 31/32). Items still under
+> **NOT_AVAILABLE** are those that genuinely need a real public domain and
+> certificate provider, which are not present in this environment.
 
 ---
 
@@ -194,7 +194,7 @@ RATE_LIMIT_WINDOW_MS
 
 ## 12. Reverse-proxy config
 
-### Caddy (CONFIGURED BUT NOT LIVE-VERIFIED)
+### Caddy (VALIDATED — local TLS, STEP 32)
 
 `backend/Caddyfile` is a local HTTPS test variant: `:8080` with `tls internal`
 (self-signed for localhost) proxying to `backend:3001`. For production, replace
@@ -218,7 +218,7 @@ For any proxy (Caddy, Nginx, Traefik, cloud LB):
 
 ## 13. Deployment
 
-### Docker (CONFIGURED BUT NOT LIVE-VERIFIED)
+### Docker (VALIDATED — local build + runtime)
 
 - `backend/Dockerfile` — Node 24 alpine, multi-stage, non-root `node` user, only
   compiled `dist/` + prod deps, no secrets baked, `NODE_ENV=production`,
@@ -233,9 +233,12 @@ docker compose up -d
 # HTTPS test edge: https://localhost:8080/health
 ```
 
-> The image/Compose config was authored and validated for structure but **not
-> executed** here (no running Docker daemon / no public cert in the environment).
-> Treat the container run as NOT_AVAILABLE for live QA.
+> The image/Compose config is validated: `docker build` succeeds, the image runs
+> as the non-root `node` user with `NODE_ENV=production`, exposes only internal
+> port `3001`, and boots to a healthy `GET /health` `{"status":"ok"}`. The
+> Compose + Caddy topology was exercised end-to-end behind local self-signed TLS
+> in STEP 32 (see §16). A real **public** HTTPS deployment is still NOT_AVAILABLE
+> here (no domain / certificate provider), as documented in the status table.
 
 ### Without Docker (IMPLEMENTED)
 
@@ -248,14 +251,79 @@ npm run start          # NODE_ENV=production node dist/index.js
 
 serve `PORT`, `HOST`, `TRUST_PROXY`, `HSTS_ENABLED`, `CORS_ORIGIN` via the env.
 
-## 14. Privacy boundary (unchanged)
+## 14. Continuous integration (CI) (IMPLEMENTED, STEP 32)
+
+A minimal GitHub Actions workflow lives at `.github/workflows/ci.yml`. It is a
+**validation-only** pipeline:
+
+- Triggers: pushes to `main`, and all pull requests.
+- Two independent jobs, `frontend` and `backend`, each:
+  - `actions/checkout@v4`
+  - `actions/setup-node@v4` with Node **24** and `cache: npm` pointed at the
+    project's own `package-lock.json`
+  - deterministic install via `npm ci` (lockfile version 3, present in both apps)
+  - then `test` → `lint` → `typecheck` (`tsc --noEmit`) → `build`
+- Minimal permissions: `contents: read` only. No secrets, no credentials, no
+  production state, no deployment steps.
+- The CI runs exactly the same commands used in local verification, so a green
+  build in CI means the same gates that pass here pass on each PR/push.
+
+It is **CI only** — it does not deploy to any provider. The frontend `xlsx`
+dependency is resolved from a pinned CDN tarball committed in the lockfile, so
+`npm ci` in CI is deterministic.
+
+## 15. Scaling & rate-limiter decision (IMPLEMENTED, STEP 32)
+
+### Current recommendation: single backend instance
+
+The backend is **optional health-only infrastructure**. It exposes only
+`GET /health` and `GET /api/v1/health`, carries no state, persists nothing, and
+does no transaction work (all analysis happens locally in the browser). There is
+no database, no sessions, no server-side processing to balance or replicate.
+
+Therefore **horizontal scaling is not currently required**. A single backend
+instance behind the reverse proxy is the correct, smallest architecture.
+
+### Rate limiter: in-memory, process-local — acceptable now
+
+The limiter (`src/rateLimit.ts`) is **in-memory and process-local**: it is reset
+on restart and shared only within one process. For a single-instance
+health-only backend this is **acceptable**, and is documented as a scaffold, not
+a distributed limiter. Keys are the trusted real client IP (unspoofable socket
+peer by default; first `X-Forwarded-For` only behind the trusted proxy).
+
+If the backend is ever run as **multiple instances**, the per-instance limiter
+would become inconsistent (a client could get N× the limit across N instances).
+A globally consistent limit would then require a shared store (e.g. Redis).
+That is **not** added now — it is speculative infrastructure for a workload
+that currently stays well within a single instance.
+
+### Future scaling triggers (qualitative — revisit if any occur)
+
+- Sustained backend request volume that the health-only work cannot serve from
+  one instance (CPU/memory saturation on the backend container).
+- A need to run multiple independent backend instances (e.g. availability) —
+  which would then require a shared rate-limit store.
+- Any new server-side functionality beyond health/limits (currently explicitly
+  out of scope) that introduces stateful work.
+- Operational availability requirements that a single instance cannot meet.
+
+### What a future multi-instance architecture would require
+
+- A shared rate-limit store (e.g. Redis) behind both the proxy and the backend,
+  so limits are global rather than per-process.
+- A load balancer or DNS round-robin in front of N backend instances.
+- No change to the privacy boundary: the backend would still never receive
+  transaction data.
+
+## 16. Privacy boundary (unchanged)
 
 The backend remains **optional health-only infrastructure**. Only `GET /health`
 ever reaches it. Transaction data, reports, merchant names, amounts, dates, and
 uploaded files never leave the browser. The reverse proxy and logging layers
 introduce no transaction data path.
 
-## 15. Status summary
+## 17. Status summary
 
 | Item | Status |
 |---|---|
@@ -267,6 +335,9 @@ introduce no transaction data path.
 | CORS allow-list (preserved) | IMPLEMENTED |
 | Health endpoints (preserved) | IMPLEMENTED |
 | Graceful shutdown (preserved) | IMPLEMENTED |
-| Caddy reference config | CONFIGURED (NOT live-verified) |
-| Dockerfile / compose | CONFIGURED (NOT live-verified) |
-| Real HTTPS deployment test | NOT_AVAILABLE in this environment |
+| Caddy reference config | VALIDATED (local TLS, STEP 32) |
+| Dockerfile / compose | VALIDATED (local build + run, STEP 32) |
+| CI pipeline (`.github/workflows/ci.yml`) | IMPLEMENTED (validation-only) |
+| Scaling recommendation | Single backend instance (documented) |
+| Rate-limiter decision | In-memory process-local — acceptable now |
+| Real public HTTPS deployment | NOT_AVAILABLE in this environment |

@@ -1,0 +1,94 @@
+# Sasscout CI (STEP 32)
+#
+# Validates the frontend and backend on every push to the main development
+# branch and on every pull request. This is validation-only: it installs
+# dependencies deterministically (npm ci from the committed lockfiles), runs
+# tests / lint / typecheck / build, and is configured with minimal permissions.
+# It does NOT deploy, does not touch production, and uses no secrets.
+#
+# Triggered by:
+#   - push to main
+#   - pull requests
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  # Cancel a superseded run for the same branch/PR + workflow to avoid wasted
+  # runner time when new commits land while a previous run is still going.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  # Read-only access to the repository contents. No write scopes, no tokens
+  # beyond the default (read) GITHUB_TOKEN are granted or used.
+  contents: read
+
+jobs:
+  backend:
+    name: backend (test / lint / typecheck / build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+  frontend:
+    name: frontend (test / lint / typecheck / build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
