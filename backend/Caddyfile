@@ -1,0 +1,24 @@
+# Sasscout backend reverse proxy (STEP 31) — Caddy.
+#
+# Production architecture:
+#
+#     Public Internet
+#            ↓  HTTPS/TLS (terminated HERE)
+#         Caddy
+#            ↓  HTTP to backend on a private network
+#     Sasscout Backend  (does NOT terminate TLS itself)
+#
+# Caddy terminates TLS and forwards plain HTTP to the backend, setting
+# X-Forwarded-For (real client IP) and X-Forwarded-Proto for the backend's
+# trusted-proxy handling (TRUST_PROXY=true on the backend).
+#
+# This Caddyfile is the LOCAL HTTPS test variant: it serves HTTPS on :8080 and
+# proxies to the `backend` compose service. `tls internal` uses Caddy's internal
+# CA (self-signed for localhost) — remove it and use your real domain in
+# production to get automatic Let's Encrypt HTTPS.
+
+:8080 {
+	tls internal
+
+	reverse_proxy backend:3001
+}

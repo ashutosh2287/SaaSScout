@@ -1,0 +1,46 @@
+# Sasscout local HTTPS reverse-proxy test (STEP 31).
+#
+# Validates the production shape end-to-end on this machine:
+#
+#     HTTPS :8080  ──>  Caddy (TLS)  ──>  backend:3001  (HTTP, private net)
+#
+# The backend container does NOT terminate TLS and is NOT exposed publicly —
+# only Caddy's :8080 is. The backend is configured with TRUST_PROXY=true and
+# HSTS_ENABLED=true just as it would be in production behind the proxy.
+#
+# For a LOCAL test only. In a real deployment replace the Caddyfile `tls
+# internal` + `:8080` with your domain and standard HTTPS. No .env is baked in;
+# all configuration is injected here as environment.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3001"
+      HOST: "0.0.0.0"            # reachable from the proxy on the private net
+      TRUST_PROXY: "true"        # trusting only the Caddy proxy (see docs)
+      HSTS_ENABLED: "true"       # we are HTTPS behind Caddy
+      CORS_ORIGIN: "http://localhost:3311,https://localhost:8080"
+      RATE_LIMIT_MAX: "120"
+      RATE_LIMIT_WINDOW_MS: "60000"
+    expose:
+      - "3001"                   # private net only — not published to the host
+    restart: unless-stopped
+
+  proxy:
+    image: caddy:2-alpine
+    ports:
+      - "8080:8080"              # the only public edge (HTTPS)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

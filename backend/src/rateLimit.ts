@@ -24,6 +24,7 @@
 
 import type { Context, MiddlewareHandler } from "hono";
 import type { AppEnv } from "./context.js";
+import { clientIp } from "./trust.js";
 
 export type RateLimitStore = {
   /** Increment the bucket for a key/window; returns count and resetAt (ms). */
@@ -60,7 +61,7 @@ export type RateLimiterOptions = {
   now?: () => number;
   /** Injectable store (for tests). */
   store?: RateLimitStore;
-  /** Derive the client key from the request (default: X-Forwarded-For first IP). */
+  /** Derive the client key from the request (default: trusted real client IP). */
   keyOf?: (c: Context<AppEnv>) => string;
 };
 
@@ -69,14 +70,13 @@ export type RateLimiter = {
   store: RateLimitStore;
 };
 
+/**
+ * Default client key = the trusted real client IP (see src/trust.ts). By
+ * default (no trusted proxy) this is the unspoofable socket peer address, so a
+ * forged `X-Forwarded-For` cannot rotate/evade the limiter.
+ */
 function defaultKeyOf(c: Context<AppEnv>): string {
-  const fwd = c.req.header("x-forwarded-for");
-  if (fwd) {
-    const first = fwd.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  // No reverse proxy present: a single local process serves all dev traffic.
-  return "local";
+  return clientIp(c);
 }
 
 export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
