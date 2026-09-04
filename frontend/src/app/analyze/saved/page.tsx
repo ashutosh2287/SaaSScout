@@ -76,13 +76,19 @@ export default function SavedAnalysesPage() {
 
           <div className="mt-8">
             {state.kind === "loading" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-500 shadow-sm">
+              <div
+                role="status"
+                className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-500 shadow-sm"
+              >
                 Loading saved analyses…
               </div>
             )}
 
             {state.kind === "error" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-600 shadow-sm">
+              <div
+                role="status"
+                className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-600 shadow-sm"
+              >
                 {state.message}
               </div>
             )}

@@ -41,7 +41,7 @@ export function SaveAnalysisCard({ report }: { report: SasscoutReport }) {
       </div>
       <div className="space-y-3 px-5 py-4">
         {state.kind === "saved" ? (
-          <div className="flex flex-wrap items-center gap-3">
+          <div role="status" className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
               ✓ Analysis saved locally on this device
             </span>
@@ -53,7 +53,7 @@ export function SaveAnalysisCard({ report }: { report: SasscoutReport }) {
             </Link>
           </div>
         ) : state.kind === "error" ? (
-          <div>
+          <div role="status">
             <p className="text-sm text-zinc-700">{state.message}</p>
             <button
               type="button"

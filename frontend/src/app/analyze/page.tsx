@@ -121,8 +121,8 @@ export default function AnalyzePage() {
                     className="mt-4 flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600"
                   >
                     <svg
-                      aria-hidden="true"
-                      className="h-4 w-4 animate-spin text-emerald-700"
+                        aria-hidden="true"
+                        className="h-4 w-4 animate-spin text-emerald-700 motion-reduce:animate-none"
                       viewBox="0 0 24 24"
                       fill="none"
                     >

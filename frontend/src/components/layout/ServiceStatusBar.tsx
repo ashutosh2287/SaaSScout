@@ -26,7 +26,7 @@ export function ServiceStatusBar() {
         ? "bg-red-500"
         : status === "not-configured"
           ? "bg-amber-500"
-          : "bg-zinc-400 animate-pulse";
+          : "bg-zinc-400 animate-pulse motion-reduce:animate-none";
 
   const text =
     status === "available"

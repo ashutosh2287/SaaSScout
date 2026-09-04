@@ -66,7 +66,7 @@ export default function SavedAnalysisPage() {
         <main className="px-6 py-16">
           <Container className="max-w-3xl text-center">
             {state.kind === "loading" && (
-              <p className="text-sm text-zinc-500">Loading saved analysis…</p>
+              <p role="status" className="text-sm text-zinc-500">Loading saved analysis…</p>
             )}
             {state.kind === "missing" && (
               <>
@@ -88,7 +88,9 @@ export default function SavedAnalysisPage() {
                 </Link>
               </>
             )}
-            {state.kind === "error" && <p className="text-sm text-zinc-600">{state.message}</p>}
+            {state.kind === "error" && (
+              <p role="status" className="text-sm text-zinc-600">{state.message}</p>
+            )}
           </Container>
         </main>
       </div>
