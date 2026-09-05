@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { UploadZone } from "@/components/analyze/UploadZone";
 import { SelectedFile } from "@/components/analyze/SelectedFile";
 import { validateFile, formatFileSize, MAX_FILE_SIZE } from "@/lib/validateFile";
 import { parseFile } from "@/lib/parse";
 import { setParseResult } from "@/lib/parse/store";
+import { createSingleFlight } from "@/lib/lifecycle/singleflight";
 
 type Phase = "idle" | "selected" | "parsing";
 
@@ -17,12 +18,22 @@ export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
-  // Synchronous in-flight guard. A double-fired Continue in the same tick (or
-  // a second click during parsing) must not run parseFile/router.push twice:
-  // the `phase` state update is async, so it alone cannot stop the duplicate.
-  const parsingRef = useRef(false);
+  // In-flight guard for the parse+push operation. A stale completion (the user
+  // replaced/removed the file or navigated away while parsing) must never
+  // commit its result to the shared store nor navigate to the preview page.
+  const [flight] = useState(createSingleFlight);
+
+  useEffect(() => {
+    const onPop = () => flight.invalidate();
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      flight.invalidate();
+    };
+  }, [flight]);
 
   function handleFile(next: File) {
+    flight.invalidate();
     const validation = validateFile(next);
     if (validation) {
       setFile(null);
@@ -36,25 +47,29 @@ export default function AnalyzePage() {
   }
 
   function handleRemove() {
+    flight.invalidate();
     setFile(null);
     setPhase("idle");
     setError(null);
   }
 
   async function handleContinue() {
-    if (!file || phase !== "selected" || parsingRef.current) return;
-    parsingRef.current = true;
+    if (!file || phase !== "selected") return;
+    const token = flight.start();
+    if (token === null) return; // an analysis is already in flight
     setPhase("parsing");
     setError(null);
     try {
       const result = await parseFile(file);
+      if (!flight.isCurrent(token)) return; // superseded or unmounted: stale
       setParseResult(result);
       router.push("/analyze/preview");
     } catch (err) {
+      if (!flight.isCurrent(token)) return;
       setPhase("selected");
       setError(err instanceof Error ? err.message : "Could not read this file.");
     } finally {
-      parsingRef.current = false;
+      flight.end(token);
     }
   }
 
@@ -64,7 +79,11 @@ export default function AnalyzePage() {
     <div className="flex min-h-screen flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
         <Container className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+          <Link
+            href="/"
+            onClick={() => flight.invalidate()}
+            className="flex items-center gap-2"
+          >
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
               S
             </span>
@@ -72,6 +91,7 @@ export default function AnalyzePage() {
           </Link>
           <Link
             href="/"
+            onClick={() => flight.invalidate()}
             className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
           >
             Back home

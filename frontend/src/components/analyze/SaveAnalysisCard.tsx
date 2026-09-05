@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { SasscoutReport } from "@/lib/report/types";
 import { createSavedAnalysis, saveAnalysis, PersistenceError } from "@/lib/persistence";
+import { createSingleFlight } from "@/lib/lifecycle/singleflight";
 
 type SaveState =
   | { kind: "idle" }
@@ -13,8 +14,13 @@ type SaveState =
 
 export function SaveAnalysisCard({ report }: { report: SasscoutReport }) {
   const [state, setState] = useState<SaveState>({ kind: "idle" });
+  // Double-fired Save in the same tick must still write exactly one record:
+  // `state` updates are async, so the disabled button alone cannot stop it.
+  const [flight] = useState(createSingleFlight);
 
   async function handleSave() {
+    const token = flight.start();
+    if (token === null) return; // a save is already in flight
     setState({ kind: "saving" });
     const analysis = createSavedAnalysis(report);
     try {
@@ -28,6 +34,8 @@ export function SaveAnalysisCard({ report }: { report: SasscoutReport }) {
             ? e.message
             : "We couldn't save this analysis on this device. Your current analysis is still available.",
       });
+    } finally {
+      flight.end(token);
     }
   }
 

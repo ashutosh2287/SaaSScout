@@ -1,5 +1,6 @@
 import { INDEX_UPDATED_AT, STORE_ANALYSES } from "./constants";
 import { PersistenceError, getDb } from "./db";
+import { isListItemSafe, sortByUpdatedAtDesc } from "./safeList";
 import type { SavedAnalysis } from "./types";
 
 function store(
@@ -40,9 +41,11 @@ export async function listAnalyses(): Promise<SavedAnalysis[]> {
   const result = await requestAsPromise(
     store(db, "readonly", () => void 0).index(INDEX_UPDATED_AT).getAll(),
   );
-  return (result as SavedAnalysis[]).sort((a, b) =>
-    b.updatedAt.localeCompare(a.updatedAt),
-  );
+  // A single corrupted/tampered record must not brick the whole list. Drop
+  // only what cannot be rendered at all; sort defensively so junk timestamps
+  // cannot throw. Corrupted records are never deleted here.
+  const safe = (result as unknown[]).filter(isListItemSafe);
+  return sortByUpdatedAtDesc(safe) as SavedAnalysis[];
 }
 
 export async function deleteAnalysis(id: string): Promise<void> {
