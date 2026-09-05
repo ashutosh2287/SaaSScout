@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { SavedReportView } from "@/components/analyze/SavedReportView";
-import { getAnalysis, PersistenceError, schemaCompatible } from "@/lib/persistence";
+import { getAnalysis, isReadableSavedAnalysis, PersistenceError, schemaCompatible } from "@/lib/persistence";
 import type { SavedAnalysis } from "@/lib/persistence/types";
 
 type State =
@@ -33,6 +33,11 @@ export default function SavedAnalysisPage() {
           setState({ kind: "missing" });
         } else if (!schemaCompatible(saved)) {
           setState({ kind: "incompatible" });
+        } else if (!isReadableSavedAnalysis(saved)) {
+          setState({
+            kind: "error",
+            message: "This saved analysis is corrupted and can't be displayed on this device.",
+          });
         } else {
           setState({ kind: "loaded", saved });
         }

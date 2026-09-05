@@ -1,4 +1,16 @@
+export type ParseCsvMeta = {
+  rows: string[][];
+  unterminatedQuote: boolean;
+};
+
 export function parseCsv(text: string): string[][] {
+  return parseCsvWithMeta(text).rows;
+}
+
+// Same parser as parseCsv, but also reports whether the input ended while
+// still inside a quoted field. An unterminated quote swallows everything up to
+// EOF and silently corrupts rows, so callers surface it as a controlled error.
+export function parseCsvWithMeta(text: string): ParseCsvMeta {
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
@@ -66,5 +78,5 @@ export function parseCsv(text: string): string[][] {
     rows.push(row);
   }
 
-  return rows;
+  return { rows, unterminatedQuote: inQuotes };
 }

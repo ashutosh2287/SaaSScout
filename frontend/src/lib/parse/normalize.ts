@@ -60,6 +60,12 @@ export function normalizeRow(
       amountError = { row: sourceRow, field: "debit", code: "INVALID_AMOUNT", message: `Could not read debit "${debit}".` };
     } else if (!cRes.ok && cRes.reason === "not-a-number") {
       amountError = { row: sourceRow, field: "credit", code: "INVALID_AMOUNT", message: `Could not read credit "${credit}".` };
+    } else if (dRes.ok || cRes.ok) {
+      // No side is a non-zero amount and no side is garbage, so any ok side
+      // parses as zero. A unified amount of "0" already yields a zero
+      // transaction; treat a zero on either side the same way instead of
+      // erroring with "No amount present in row.".
+      amount = 0;
     }
   }
 

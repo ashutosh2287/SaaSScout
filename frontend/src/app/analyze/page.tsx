@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { UploadZone } from "@/components/analyze/UploadZone";
 import { SelectedFile } from "@/components/analyze/SelectedFile";
@@ -17,6 +17,10 @@ export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
+  // Synchronous in-flight guard. A double-fired Continue in the same tick (or
+  // a second click during parsing) must not run parseFile/router.push twice:
+  // the `phase` state update is async, so it alone cannot stop the duplicate.
+  const parsingRef = useRef(false);
 
   function handleFile(next: File) {
     const validation = validateFile(next);
@@ -38,7 +42,8 @@ export default function AnalyzePage() {
   }
 
   async function handleContinue() {
-    if (!file || phase !== "selected") return;
+    if (!file || phase !== "selected" || parsingRef.current) return;
+    parsingRef.current = true;
     setPhase("parsing");
     setError(null);
     try {
@@ -48,6 +53,8 @@ export default function AnalyzePage() {
     } catch (err) {
       setPhase("selected");
       setError(err instanceof Error ? err.message : "Could not read this file.");
+    } finally {
+      parsingRef.current = false;
     }
   }
 

@@ -5,11 +5,20 @@ export type AmountResult =
 const CURRENCY = /[$£€¥₹₩₽]/g;
 const GROUP_SEP = /,(?=\d{3})/g;
 
+// Reject magnitudes beyond 2^53-1: values larger than that lose integer
+// precision, and summing many extreme-but-finite values can overflow report
+// totals to Infinity (money integrity / no-Infinity guarantee).
+const MAX_SAFE_MAGNITUDE = Number.MAX_SAFE_INTEGER;
+
+function isMoney(value: number): boolean {
+  return Number.isFinite(value) && Math.abs(value) <= MAX_SAFE_MAGNITUDE;
+}
+
 export function parseAmount(raw: unknown): AmountResult {
   if (raw === null || raw === undefined) return { ok: false, reason: "empty" };
 
   if (typeof raw === "number") {
-    return Number.isFinite(raw) ? { ok: true, value: raw } : { ok: false, reason: "not-a-number" };
+    return isMoney(raw) ? { ok: true, value: raw } : { ok: false, reason: "not-a-number" };
   }
 
   if (typeof raw !== "string") return { ok: false, reason: "not-a-number" };
@@ -35,7 +44,7 @@ export function parseAmount(raw: unknown): AmountResult {
   if (s === "") return { ok: false, reason: "not-a-number" };
 
   const value = Number(s);
-  if (!Number.isFinite(value)) return { ok: false, reason: "not-a-number" };
+  if (!isMoney(value)) return { ok: false, reason: "not-a-number" };
 
   return { ok: true, value: sign * value };
 }

@@ -1,5 +1,5 @@
 import { detectColumns } from "./columns";
-import { parseCsv } from "./csv";
+import { parseCsvWithMeta } from "./csv";
 import { buildHeaderIndex, normalizeRow, resetIdCounter } from "./normalize";
 import type { ParseError, ParseResult, ParseWarning } from "./types";
 import { readWorksheet } from "./xlsx";
@@ -76,7 +76,10 @@ export async function parseFile(file: File): Promise<ParseResult> {
     // Assumption: UTF-8 encoded CSV text. Not all CSVs are UTF-8; full encoding
     // detection is out of scope for V1. Non-UTF-8 files may misread characters.
     const text = await file.text();
-    const allRows = parseCsv(text);
+    const { rows: allRows, unterminatedQuote } = parseCsvWithMeta(text);
+    if (unterminatedQuote) {
+      return emptyResult(file.name, [{ code: "UNSUPPORTED_STRUCTURE", message: "The CSV contains an unterminated quoted field (missing a closing quote)." }]);
+    }
     if (allRows.length === 0) {
       return emptyResult(file.name, [{ code: "EMPTY_FILE", message: "The file is empty." }]);
     }

@@ -54,36 +54,130 @@ export function amountStability(amounts: number[]): RecurringAmountStability {
   return "variable";
 }
 
+// A minimal binary min-heap (Stdlib-free; nothing in Node/browser exposes an
+// indexable priority queue).
+class MinHeap {
+  private h: number[] = [];
+
+  get size(): number {
+    return this.h.length;
+  }
+
+  peek(): number {
+    return this.h[0];
+  }
+
+  push(v: number): void {
+    this.h.push(v);
+    let i = this.h.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (this.h[p] <= this.h[i]) break;
+      const t = this.h[p];
+      this.h[p] = this.h[i];
+      this.h[i] = t;
+      i = p;
+    }
+  }
+
+  pop(): number {
+    const top = this.h[0];
+    const last = this.h.pop()!;
+    if (this.h.length > 0) {
+      this.h[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = i * 2 + 1;
+        const r = l + 1;
+        let m = i;
+        if (l < this.h.length && this.h[l] < this.h[m]) m = l;
+        if (r < this.h.length && this.h[r] < this.h[m]) m = r;
+        if (m === i) break;
+        const t = this.h[m];
+        this.h[m] = this.h[i];
+        this.h[i] = t;
+        i = m;
+      }
+    }
+    return top;
+  }
+}
+
+// Exact running median over a growing set. `lower` (max-heap) holds the smaller
+// half, `upper` (min-heap) the larger; |lower| is either |upper| or |upper|+1.
+class RunningMedian {
+  private lower = new MinHeap();
+  private upper = new MinHeap();
+
+  add(x: number): void {
+    if (this.lower.size === 0 || x <= -this.lower.peek()) this.lower.push(-x);
+    else this.upper.push(x);
+    if (this.lower.size > this.upper.size + 1) this.upper.push(-this.lower.pop());
+    else if (this.upper.size > this.lower.size) this.lower.push(-this.upper.pop());
+  }
+
+  median(): number {
+    if (this.lower.size > this.upper.size) return -this.lower.peek();
+    return (-this.lower.peek() + this.upper.peek()) / 2;
+  }
+}
+
 // Detect a clean old->new amount step: the first k payments sit tightly around
 // one level and the rest around a second, higher/lower level, with a meaningful
 // jump between them. Level tolerance is the same relative constant used
 // elsewhere; the jump must exceed PRICE_CHANGE_MIN_RELATIVE.
+//
+// O(n log n): prefix and suffix medians/min/max are precomputed with running
+// medians, so each split point is O(1). The old implementation re-sorted both
+// slices per split (O(n^2 log n)) and dominated the pipeline for any merchant
+// with thousands of payments. Semantics are identical: same medians, same
+// stability test, and the first valid split in scan order wins.
 export function detectPriceChange(amounts: number[]): RecurringPriceChange | null {
   const n = amounts.length;
   if (n < 3) return null;
-  // Scan every split point; pick the smallest middle gap where both sides are
-  // internally level-stable and the step is meaningful.
+
+  // Suffix stats for amounts[k..n-1], built right-to-left.
+  const sufMedian = new Array<number>(n);
+  const sufMin = new Array<number>(n);
+  const sufMax = new Array<number>(n);
+  const suf = new RunningMedian();
+  let mn = Infinity;
+  let mx = -Infinity;
+  for (let k = n - 1; k >= 1; k--) {
+    const v = amounts[k];
+    suf.add(v);
+    if (v < mn) mn = v;
+    if (v > mx) mx = v;
+    sufMedian[k] = suf.median();
+    sufMin[k] = mn;
+    sufMax[k] = mx;
+  }
+
+  // Scan split points in order; first clean step wins (matches prior behavior).
+  const pre = new RunningMedian();
+  let preMin = Infinity;
+  let preMax = -Infinity;
   for (let k = 1; k < n; k++) {
-    const a = amounts.slice(0, k);
-    const b = amounts.slice(k);
-    const medA = medianAmount(a);
-    const medB = medianAmount(b);
-    if (medA === null || medB === null || medA === 0) continue;
+    const v = amounts[k - 1];
+    pre.add(v);
+    if (v < preMin) preMin = v;
+    if (v > preMax) preMax = v;
+
+    const medA = pre.median();
+    const medB = sufMedian[k];
+    if (medA === 0) continue;
     const jump = Math.abs(medB - medA) / Math.abs(medA);
     if (jump < PRICE_CHANGE_MIN_RELATIVE) continue;
-    if (!isLevelStable(a, medA) || !isLevelStable(b, medB)) continue;
+    if (!isLevelStable(preMin, preMax, medA) || !isLevelStable(sufMin[k], sufMax[k], medB)) continue;
     return { from: medA, to: medB };
   }
   return null;
 }
 
-// All amounts within the relative tolerance of the given level median.
-function isLevelStable(amounts: number[], levelMedian: number): boolean {
+// All amounts within the relative tolerance of the given level median. Checking
+// the set's min and max is exact: the extremes maximise |amount - median|.
+function isLevelStable(min: number, max: number, levelMedian: number): boolean {
   if (levelMedian === 0) return false;
-  for (const a of amounts) {
-    if (Math.abs(a - levelMedian) / Math.abs(levelMedian) > AMOUNT_RELATIVE_TOLERANCE) {
-      return false;
-    }
-  }
-  return true;
+  const tol = AMOUNT_RELATIVE_TOLERANCE * Math.abs(levelMedian);
+  return Math.abs(levelMedian - min) <= tol && Math.abs(max - levelMedian) <= tol;
 }

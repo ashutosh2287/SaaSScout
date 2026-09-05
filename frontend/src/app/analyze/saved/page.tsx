@@ -12,10 +12,15 @@ type State =
   | { kind: "loaded"; items: SavedAnalysis[] }
   | { kind: "error"; message: string };
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+function formatDate(value: unknown): string {
+  if (typeof value !== "string") return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function displayName(value: unknown): string {
+  return typeof value === "string" ? value : "Unnamed analysis";
 }
 
 export default function SavedAnalysesPage() {
@@ -115,9 +120,9 @@ export default function SavedAnalysesPage() {
                   return (
                     <li key={item.id} className="flex items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-900">{item.name}</p>
+                        <p className="text-sm font-medium text-zinc-900">{displayName(item.name)}</p>
                         <p className="mt-0.5 text-xs text-zinc-500">
-                          {item.fileName} · Saved {formatDate(item.updatedAt)}
+                          {typeof item.fileName === "string" ? item.fileName : ""} · Saved {formatDate(item.updatedAt)}
                         </p>
                         {!compatible && (
                           <p className="mt-1 text-xs text-amber-700">
