@@ -2,11 +2,11 @@
 
 **SaaS-spend audit and decision support for small businesses.**
 
-Sasscout is a lightweight SaaS-spend audit and decision tool. It will eventually
-let a business upload financial transaction files (CSV/XLSX) and discover
-software/SaaS spending, recurring payments, spending changes, new recurring
-charges, overlapping tools, vendors without owners, vendors across multiple
-payment sources, and other software-spend findings.
+Sasscout is a lightweight SaaS-spend audit and decision tool. A business uploads
+financial transaction files (CSV/XLSX) and Sasscout discovers software/SaaS
+spending, recurring payments, spending changes, and other software-spend
+review signals. Every finding is labelled by confidence and presented as a
+review signal, never as a confirmed wasteful or unused subscription.
 
 > **Core philosophy: Decision quality, not transaction detection.**
 
@@ -31,8 +31,11 @@ export, save, or saved reports — the product stays fully usable when the
 backend is down or unconfigured.
 
 Not yet implemented (deferred to future steps): authentication, database,
-cloud storage, AI/LLM analysis, payments/subscriptions, analytics, and
-telemetry. The backend intentionally has no such functionality yet.
+cloud storage, AI/LLM analysis, payments/subscriptions, analytics, telemetry,
+and the deeper spend findings advertised on the landing page (overlapping
+tools, vendors without owners, vendors across multiple payment sources, and
+dedicated "new recurring charge" detection). The backend intentionally has no
+such functionality yet.
 
 ## Project Structure
 

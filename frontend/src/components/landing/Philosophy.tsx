@@ -18,7 +18,7 @@ const tiers = [
     label: "Needs review",
     tone: "bg-zinc-100 text-zinc-700",
     dot: "bg-zinc-400",
-    body: "Worth investigating, such as possible overlap between tools.",
+    body: "Worth investigating, such as a recurring charge that changed amount or an unclear payment pattern.",
   },
 ];
 

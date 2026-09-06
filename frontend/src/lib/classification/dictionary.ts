@@ -34,6 +34,90 @@ export const CLASSIFICATION_DICTIONARY: ClassificationDefinition[] = [
     confidence: "high",
     evidence: "Merchant is recognized as a software-as-a-service provider.",
   },
+  {
+    normalizedKey: "microsoft",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "netflix",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a subscription service provider.",
+  },
+  {
+    normalizedKey: "spotify",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a subscription service provider.",
+  },
+  {
+    normalizedKey: "zoom",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "openai",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "shopify",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "trello",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "atlassian",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "salesforce",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "hubspot",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "dropbox",
+    category: "likely_software",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software provider.",
+  },
+  {
+    normalizedKey: "canva",
+    category: "likely_software",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software provider.",
+  },
+  {
+    normalizedKey: "github",
+    category: "likely_saas",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software-as-a-service provider.",
+  },
+  {
+    normalizedKey: "notion",
+    category: "likely_software",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software provider.",
+  },
 ];
 
 // O(1) lookup by Step 6 normalizedKey.

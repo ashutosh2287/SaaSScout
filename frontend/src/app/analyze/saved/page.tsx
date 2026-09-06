@@ -77,6 +77,14 @@ export default function SavedAnalysesPage() {
           <div className="text-center">
             <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">Saved analyses</h1>
             <p className="mt-3 text-zinc-600">Analyses saved privately on this device. Nothing is uploaded.</p>
+            {state.kind === "loaded" && state.items.length >= 2 && (
+              <Link
+                href="/analyze/compare"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-emerald-700 px-4 py-2 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-50"
+              >
+                Compare two periods
+              </Link>
+            )}
           </div>
 
           <div className="mt-8">
