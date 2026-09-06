@@ -76,6 +76,7 @@ function runReport(txns: NormalizedTransaction[], generatedAt = "2026-01-15T10:0
         warnings: [],
         columns: {},
         columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+        currency: null,
       },
       quality,
       classification: classificationResult,

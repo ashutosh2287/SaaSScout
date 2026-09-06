@@ -1,3 +1,4 @@
+import { isCurrencySymbol } from "../parse/currency";
 import type { MerchantCategory } from "../classification/types";
 import type { RecurringAmountStability, RecurringStatus, RecurringStrength } from "../recurring/types";
 import type { ReviewStatus } from "../leak/types";
@@ -43,8 +44,11 @@ export const CONFIDENCE_LABEL: Record<string, string> = {
   low: "Low",
 };
 
-export function fmtMoney(n: number | null): string {
+export function fmtMoney(n: number | null, currency?: string | null): string {
   if (n === null) return "";
   const abs = Math.abs(n);
-  return (n < 0 ? "-$" : "$") + abs.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  // Unknown currency keeps the legacy "$" display but the report records
+  // currency: null so the UI can call it out as undetected.
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
+  return (n < 0 ? "-" + symbol : symbol) + abs.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }

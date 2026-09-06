@@ -4,23 +4,23 @@ import { formatMoney } from "@/lib/dashboard";
 // Top-level key financial metrics. Values are the existing analysis outputs,
 // re-presented only. Estimates are always labelled as estimates.
 
-export function DashboardMetrics({ metrics }: { metrics: Metrics }) {
+export function DashboardMetrics({ metrics, currency }: { metrics: Metrics; currency?: string | null }) {
   const stat = [
     {
       label: "Software spend identified",
-      value: formatMoney(metrics.softwareSpendIdentified),
+      value: formatMoney(metrics.softwareSpendIdentified, currency),
       cls: "text-zinc-900",
       hint: "identified, not confirmed",
     },
     {
       label: "Est. recurring software spend / mo",
-      value: `${formatMoney(metrics.estimatedRecurringMonthly)} / mo`,
+      value: `${formatMoney(metrics.estimatedRecurringMonthly, currency)} / mo`,
       cls: "text-emerald-700",
       hint: "estimated",
     },
     {
       label: "Est. recurring software spend / yr",
-      value: `${formatMoney(metrics.estimatedRecurringYearly)} / yr`,
+      value: `${formatMoney(metrics.estimatedRecurringYearly, currency)} / yr`,
       cls: "text-emerald-700",
       hint: "estimated",
     },

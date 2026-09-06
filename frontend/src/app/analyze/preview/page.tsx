@@ -15,6 +15,8 @@ import { intervalLabel, statusLabel, statusTone } from "@/components/analyze/rec
 import { classifyMerchants } from "@/lib/classification";
 import { detectRecurring } from "@/lib/recurring";
 import { getParseResult } from "@/lib/parse/store";
+import { isCurrencySymbol } from "@/lib/parse/currency";
+import { summarizeParseErrors } from "@/lib/parse/errors";
 import { normalizeMerchants } from "@/lib/merchant";
 import { inspectDataQuality } from "@/lib/quality";
 import { aggregateSoftwareSpend } from "@/lib/software";
@@ -24,9 +26,10 @@ import { deriveDashboard, reviewFromSpendReview, rowFromSoftwareMerchant } from 
 
 const PREVIEW_ROWS = 20;
 
-function fmtAmount(n: number): string {
+function fmtAmount(n: number, currency?: string | null): string {
   const abs = Math.abs(n);
-  return (n < 0 ? "-$" : "$") + abs.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
+  return (n < 0 ? "-" + symbol : symbol) + abs.toLocaleString("en-US", { maximumFractionDigits: 2 });
 }
 
 export default function PreviewPage() {
@@ -73,7 +76,7 @@ function PreviewContent({
     classificationResult.merchants,
     recurringResult.patterns,
   );
-  const reviewResult = detectSpendReviews(softwareResult.merchants, quality);
+  const reviewResult = detectSpendReviews(softwareResult.merchants, quality, result.currency);
   const report = buildReport({
     parse: result,
     quality,
@@ -153,8 +156,32 @@ function PreviewContent({
             </div>
           </div>
 
+          {attentionCount > 0 && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+              <h2 className="text-sm font-semibold text-amber-900">
+                {attentionCount} transaction{attentionCount === 1 ? "" : "s"} skipped
+              </h2>
+              <ul className="mt-3 space-y-3">
+                {summarizeParseErrors(errors).map((s) => (
+                  <li key={s.code}>
+                    <p className="text-sm font-medium text-amber-900">
+                      {s.label} · {s.count}
+                    </p>
+                    <p className="text-sm text-amber-800">{s.hint}</p>
+                    {s.sampleRows.length > 0 && (
+                      <p className="text-xs text-amber-700">
+                        Rows: {s.sampleRows.join(", ")}
+                        {s.count > s.sampleRows.length ? ", …" : ""}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="mt-8">
-            <DashboardMetrics metrics={view.metrics} />
+            <DashboardMetrics metrics={view.metrics} currency={result.currency} />
           </div>
 
           <div className="mt-4">
@@ -164,6 +191,7 @@ function PreviewContent({
               strongReviewCount={reviewResult.summary.strongReviewCount}
               reviewCount={reviewResult.summary.reviewCount}
               onInspect={merchantDetail.inspect}
+              currency={result.currency}
             />
           </div>
 
@@ -173,7 +201,7 @@ function PreviewContent({
             <RecurringCard s={recurringResult.summary} />
           </div>
 
-          <SoftwareBreakdown rows={view.softwareRows} onInspect={merchantDetail.inspect} />
+          <SoftwareBreakdown rows={view.softwareRows} onInspect={merchantDetail.inspect} currency={result.currency} />
 
           <div className="mt-4">
             <DataQualityCard q={quality} />
@@ -261,7 +289,7 @@ function PreviewContent({
                           })()}
                         </td>
                         <td className={`whitespace-nowrap px-5 py-3 text-right tabular-nums ${t.amount < 0 ? "text-red-600" : "text-zinc-900"}`}>
-                          {fmtAmount(t.amount)}
+                          {fmtAmount(t.amount, result.currency)}
                         </td>
                         <td className="whitespace-nowrap px-5 py-3 text-right text-zinc-500">{t.sourceRow}</td>
                       </tr>

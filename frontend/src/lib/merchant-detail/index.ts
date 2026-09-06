@@ -22,6 +22,8 @@ export type MerchantDetail = {
   transactionCount: number;
   rawDescriptorCount: number;
   rawDescriptors: string[];
+  // Statement currency for money formatting, or null when undetected.
+  currency: string | null;
 
   classification: MerchantClassification;
   classificationEvidence: ClassificationEvidence[];
@@ -58,7 +60,7 @@ export type MerchantDetail = {
 
 export const REVIEW_UNAVAILABLE: ReviewStatus | null = null;
 
-export function deriveMerchantDetail(m: ReportMerchant): MerchantDetail {
+export function deriveMerchantDetail(m: ReportMerchant, currency: string | null = null): MerchantDetail {
   const rec = m.recurring;
   const rv = m.review;
   return {
@@ -67,6 +69,7 @@ export function deriveMerchantDetail(m: ReportMerchant): MerchantDetail {
     transactionCount: m.transactionCount,
     rawDescriptorCount: m.distinctRawDescriptions.length,
     rawDescriptors: m.distinctRawDescriptions.slice(0, 3),
+    currency,
 
     classification: m.classification,
     classificationEvidence: m.classification.evidence,
@@ -105,7 +108,7 @@ export function deriveMerchantDetail(m: ReportMerchant): MerchantDetail {
 // O(m) lookup over the report's merchants. Returns null when the key is unknown.
 export function merchantDetailForKey(report: SasscoutReport, key: string): MerchantDetail | null {
   const m = report.merchants.find((m) => m.normalizedKey === key);
-  return m ? deriveMerchantDetail(m) : null;
+  return m ? deriveMerchantDetail(m, report.currency) : null;
 }
 
 // Deterministic, HTML-id-safe unique panel id so aria-controls/aria-labelledby

@@ -13,6 +13,7 @@ export type ColumnMap = {
   amount?: string;
   debit?: string;
   credit?: string;
+  currency?: string;
 };
 
 export type ColumnDiagnostics = {
@@ -51,4 +52,8 @@ export type ParseResult = {
   warnings: ParseWarning[];
   columns: ColumnMap;
   columnDiagnostics: ColumnDiagnostics;
+  // Detectable statement currency (symbol like "$" or "€"), or null when the
+  // file gives no consistent, unambiguous evidence. null means "unknown", not
+  // "US dollars".
+  currency: string | null;
 };

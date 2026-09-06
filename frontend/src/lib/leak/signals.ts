@@ -1,11 +1,13 @@
 import type { RecurringPattern, RecurringInterval } from "../recurring/types";
 import type { SoftwareSpendMerchant } from "../software/types";
+import { isCurrencySymbol } from "../parse/currency";
 import type { ReviewReason } from "./types";
 import { DAYS_PER_MONTH } from "./constants";
 
-function fmtMoney(n: number | null): string | null {
+function fmtMoney(n: number | null, currency?: string | null): string | null {
   if (n === null) return null;
-  return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
+  return symbol + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 
 // Approximate months between two ISO dates, floored at zero. Retained as a
@@ -39,7 +41,7 @@ function intervalPhrase(interval: RecurringInterval): string | null {
 // reasons. No internal scoring terms are exposed. Step 15 is the only source of
 // truth for amount stability, gaps, price changes and span — nothing here
 // recomputes them.
-export function buildReasons(m: SoftwareSpendMerchant): ReviewReason[] {
+export function buildReasons(m: SoftwareSpendMerchant, currency?: string | null): ReviewReason[] {
   const reasons: ReviewReason[] = [];
   const r = m.recurring;
   const paymentCount = m.transactionCount;
@@ -71,8 +73,8 @@ export function buildReasons(m: SoftwareSpendMerchant): ReviewReason[] {
 
   const monthly = m.estimatedMonthlySpend;
   const yearly = m.estimatedYearlySpend;
-  const mStr = fmtMoney(monthly);
-  const yStr = fmtMoney(yearly);
+  const mStr = fmtMoney(monthly, currency);
+  const yStr = fmtMoney(yearly, currency);
   if (monthly !== null && mStr !== null) {
     reasons.push({ type: "high_monthly_spend", message: `Estimated recurring spend of ${mStr}/month.` });
   } else if (yearly !== null && yStr !== null) {
@@ -100,8 +102,8 @@ export function buildReasons(m: SoftwareSpendMerchant): ReviewReason[] {
 
   // A price change is supporting evidence, never proof of unfairness.
   if (r && r.priceChange) {
-    const from = fmtMoney(r.priceChange.from);
-    const to = fmtMoney(r.priceChange.to);
+    const from = fmtMoney(r.priceChange.from, currency);
+    const to = fmtMoney(r.priceChange.to, currency);
     if (from !== null && to !== null) {
       const direction = r.priceChange.to > r.priceChange.from ? "increased" : "decreased";
       reasons.push({

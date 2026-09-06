@@ -152,6 +152,55 @@ describe("compareReports ordering guard", () => {
   });
 });
 
+describe("compareReports currency guard", () => {
+  it("flags divergent statement currencies as a caution", () => {
+    const res = compareReports(
+      { ...reportWithWindow("2026-01-01", "2026-02-01"), currency: "€" },
+      { ...reportWithWindow("2026-02-01", "2026-03-01"), currency: "$" },
+      { baseline: "a.csv", current: "b.csv" },
+    );
+    expect(res.ordered).toBe(true); // ordering is still sound
+    expect(res.caution).toContain("currencies");
+  });
+
+  it("accepts matching statement currencies", () => {
+    const res = compareReports(
+      { ...reportWithWindow("2026-01-01", "2026-02-01"), currency: "$" },
+      { ...reportWithWindow("2026-02-01", "2026-03-01"), currency: "$" },
+      { baseline: "a.csv", current: "b.csv" },
+    );
+    expect(res.caution).toBeNull();
+  });
+
+  it("keeps the order caution when both order and currency are off", () => {
+    const res = compareReports(
+      { ...reportWithWindow("2026-03-01", "2026-04-01"), currency: "€" },
+      { ...reportWithWindow("2026-01-01", "2026-02-01"), currency: "$" },
+      { baseline: "a.csv", current: "b.csv" },
+    );
+    expect(res.caution).toContain("overlap in an unexpected order");
+  });
+
+  it("bakes each report's own symbol into price-change evidence", () => {
+    const ADOBE_BASE = merchant("adobe", "Adobe", ["ADOBE"], pattern({
+      transactionCount: 3, firstSeen: "2026-01-05", lastSeen: "2026-03-05", typicalAmount: 10,
+    }));
+    const ADOBE_CUR = merchant("adobe", "Adobe", ["ADOBE"], pattern({
+      transactionCount: 3, firstSeen: "2026-04-05", lastSeen: "2026-06-05", typicalAmount: 25,
+    }));
+    const res = compareReports(
+      { ...reportWith("2026-01-01", "2026-03-31", [ADOBE_BASE]), currency: "€" },
+      { ...reportWith("2026-04-01", "2026-06-30", [ADOBE_CUR]), currency: "$" },
+      { baseline: "a.csv", current: "b.csv" },
+    );
+    const finding = res.findings.find((f) => f.kind === "price_increase");
+    expect(finding).toBeDefined();
+    const messages = (finding?.evidence ?? []).map((e) => e.message).join(" ");
+    expect(messages).toContain("€10.00");
+    expect(messages).toContain("$25.00");
+  });
+});
+
 describe("Step 19 — observed absence is anchored to the last charge", () => {
   it("never counts days where the merchant is provably still present", () => {
     // Baseline window overlaps the current window and the merchant charged

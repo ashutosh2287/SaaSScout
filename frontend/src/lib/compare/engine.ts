@@ -23,6 +23,7 @@ import type {
   SuppressionCategory,
 } from "./types";
 import type { SasscoutReport } from "../report/types";
+import { isCurrencySymbol } from "../parse/currency";
 import type { RecurringInterval, RecurringPattern } from "../recurring/types";
 
 const DAY_MS = 86_400_000;
@@ -143,8 +144,9 @@ function confidenceCapForInterval(
   return base;
 }
 
-function fmtMoney(n: number): string {
-  return `$${n.toFixed(2)}`;
+function fmtMoney(n: number, currency?: string | null): string {
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
+  return `${symbol}${n.toFixed(2)}`;
 }
 
 function annualized(amount: number, periodDays: number): number {
@@ -166,6 +168,8 @@ export function compareReports(
     window: windowOf(current),
     generatedAt: current.generatedAt,
   };
+  const currencyA = baseline.currency ?? null;
+  const currencyB = current.currency ?? null;
 
   const findings: ComparisonFinding[] = [];
   const suppressed: SuppressedHypothesis[] = [];
@@ -283,8 +287,8 @@ export function compareReports(
           const monthlyDelta = increase ? bT - aT : aT - bT;
           const yearlyDelta = annualized(monthlyDelta, periodDays);
           const ev: ComparisonEvidence[] = [
-            evidence("typical_amount_baseline", `Typical charge in the earlier period: ${fmtMoney(aT)}`),
-            evidence("typical_amount_current", `Typical charge in the current period: ${fmtMoney(bT)}`),
+            evidence("typical_amount_baseline", `Typical charge in the earlier period: ${fmtMoney(aT, currencyA)}`),
+            evidence("typical_amount_current", `Typical charge in the current period: ${fmtMoney(bT, currencyB)}`),
           ];
           if ((aR?.amountProfile ?? null) === "variable" || (bR?.amountProfile ?? null) === "variable") {
             ev.push(evidence("amount_unstable", "One period's amounts vary, so the step is approximate."));
@@ -571,16 +575,26 @@ export function compareReports(
 
   // Window-order honesty check: if both windows are known but the baseline is
   // labeled "earlier" while it actually starts later, the direction of every
-  // finding is reversed from what the labels claim.
-  let caution: string | null = null;
+  // finding is reversed from what the labels claim. This, not a currency
+  // mismatch, drives `ordered`.
+  let orderCaution: string | null = null;
   if (
     bRef.window.start !== null &&
     cRef.window.start !== null &&
     bRef.window.start > cRef.window.start
   ) {
-    caution =
+    orderCaution =
       "The baseline/current periods overlap in an unexpected order (baseline starts after current). Findings still reflect data as reported, but check the periods you selected.";
   }
+
+  // A currency mismatch doesn't reverse finding direction, so it must not
+  // flip `ordered`; it only flags that cross-report dollar figures are not
+  // conversion-adjusted.
+  let currencyCaution: string | null = null;
+  if (currencyA !== null && currencyB !== null && currencyA !== currencyB) {
+    currencyCaution = `The two files use different currencies (${currencyA} vs ${currencyB}). Amount comparisons are not conversion-adjusted; treat the delta figures as indicative only.`;
+  }
+  const caution = orderCaution ?? currencyCaution;
 
   // Deterministic ordering: kind, then merchant name.
   const kindOrder: Record<ComparisonKind, number> = {
@@ -597,7 +611,7 @@ export function compareReports(
     kindOrder[x.kind] - kindOrder[y.kind] || x.merchantName.localeCompare(y.merchantName),
   );
 
-  return { baseline: bRef, current: cRef, ordered: !caution, caution, findings, suppressed, insufficientEvidence };
+  return { baseline: bRef, current: cRef, ordered: orderCaution === null, caution, findings, suppressed, insufficientEvidence };
 }
 
 export { windowOf, cyclesCovered, concretePeriodDays, observedAbsenceDays, cadenceBrokenEvidence };

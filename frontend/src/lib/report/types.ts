@@ -47,6 +47,9 @@ export type SasscoutReport = {
   reportVersion: number;
   generatedAt: string;
   file: { name: string; totalRows: number; parsedRows: number; skippedRows: number };
+  // Detected statement currency as a display symbol, or null when the file gave
+  // no consistent evidence. null means "unknown", not "US dollars".
+  currency: string | null;
   quality: DataQualityDiagnostics;
   classification: ClassificationSummary;
   softwareSpend: SoftwareSpendSummary;

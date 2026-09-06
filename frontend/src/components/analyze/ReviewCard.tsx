@@ -28,7 +28,7 @@ const reviewStatusTone: Record<ReviewStatus, string> = {
 
 const TOP_REVIEWS = 6;
 
-export function ReviewCard({ result }: { result: SpendReviewResult }) {
+export function ReviewCard({ result, currency }: { result: SpendReviewResult; currency?: string | null }) {
   const s = result.summary;
   const blocked = result.dataQuality === "blocked";
   const prioritized = result.reviews.filter(
@@ -69,13 +69,13 @@ export function ReviewCard({ result }: { result: SpendReviewResult }) {
               <div className="rounded-lg bg-zinc-50 px-4 py-3">
                 <dt className="text-xs text-zinc-500">Est. recurring spend to review / mo</dt>
                 <dd className="mt-1 text-xl font-semibold tabular-nums text-zinc-900">
-                  {formatMoney(s.estimatedMonthlyReviewSpend)}
+                  {formatMoney(s.estimatedMonthlyReviewSpend, currency)}
                 </dd>
               </div>
               <div className="rounded-lg bg-zinc-50 px-4 py-3">
                 <dt className="text-xs text-zinc-500">Est. recurring spend to review / yr</dt>
                 <dd className="mt-1 text-xl font-semibold tabular-nums text-zinc-900">
-                  {formatMoney(s.estimatedYearlyReviewSpend)}
+                  {formatMoney(s.estimatedYearlyReviewSpend, currency)}
                 </dd>
               </div>
             </dl>
@@ -88,7 +88,7 @@ export function ReviewCard({ result }: { result: SpendReviewResult }) {
             ) : (
               <ul className="mt-4 divide-y divide-zinc-100">
                 {top.map((r) => (
-                  <ReviewRow key={r.merchantKey} r={r} />
+                  <ReviewRow key={r.merchantKey} r={r} currency={currency} />
                 ))}
               </ul>
             )}
@@ -111,7 +111,7 @@ export function ReviewCard({ result }: { result: SpendReviewResult }) {
   );
 }
 
-function ReviewRow({ r }: { r: SpendReview }) {
+function ReviewRow({ r, currency }: { r: SpendReview; currency?: string | null }) {
   const [open, setOpen] = useState(false);
   const rec = r.recurring;
   const panelId = uniquePanelId("review-evidence", r.merchantKey);
@@ -154,7 +154,7 @@ function ReviewRow({ r }: { r: SpendReview }) {
           </p>
         </div>
         <span className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900">
-          {r.estimatedMonthlySpend !== null ? `${formatMoney(r.estimatedMonthlySpend)}/mo` : "—"}
+          {r.estimatedMonthlySpend !== null ? `${formatMoney(r.estimatedMonthlySpend, currency)}/mo` : "—"}
         </span>
       </button>
 
@@ -179,11 +179,11 @@ function ReviewRow({ r }: { r: SpendReview }) {
             </section>
           )}
 
-          {reviewFacts(r).length > 0 && (
+          {reviewFacts(r, currency).length > 0 && (
             <section>
               <p className="text-xs font-semibold text-zinc-500">Recurring pattern details</p>
               <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600">
-                {reviewFacts(r).map((fact, i) => (
+                {reviewFacts(r, currency).map((fact, i) => (
                   <li key={i} className="flex items-start gap-1.5">
                     <span aria-hidden="true" className="mt-0.5 text-zinc-500">•</span>
                     {fact}
@@ -210,8 +210,8 @@ function ReviewRow({ r }: { r: SpendReview }) {
           </section>
           {r.estimatedMonthlySpend !== null && (
             <p className="text-xs text-zinc-500">
-              Estimated {formatMoney(r.estimatedMonthlySpend)}/month
-              {r.estimatedYearlySpend !== null ? ` · ${formatMoney(r.estimatedYearlySpend)}/year` : ""}
+              Estimated {formatMoney(r.estimatedMonthlySpend, currency)}/month
+              {r.estimatedYearlySpend !== null ? ` · ${formatMoney(r.estimatedYearlySpend, currency)}/year` : ""}
             </p>
           )}
         </div>
@@ -221,7 +221,7 @@ function ReviewRow({ r }: { r: SpendReview }) {
 }
 
 // Counted, observational recurring-pattern facts. Only meaningful values shown.
-function reviewFacts(r: SpendReview): string[] {
+function reviewFacts(r: SpendReview, currency?: string | null): string[] {
   const rec = r.recurring;
   if (!rec) return [];
   const facts: string[] = [];
@@ -241,7 +241,7 @@ function reviewFacts(r: SpendReview): string[] {
     facts.push(`${rec.gapCount} payment gap${rec.gapCount === 1 ? "" : "s"} detected.`);
   }
   if (rec.priceChange) {
-    facts.push(`A price change was detected from ${formatMoney(rec.priceChange.from)} to ${formatMoney(rec.priceChange.to)}.`);
+    facts.push(`A price change was detected from ${formatMoney(rec.priceChange.from, currency)} to ${formatMoney(rec.priceChange.to, currency)}.`);
   }
   return facts;
 }

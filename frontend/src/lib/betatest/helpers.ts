@@ -13,6 +13,7 @@ export function buildReportFor(txns: NormalizedTransaction[], fileName: string):
     errors: [],
     warnings: [],
     columns: {},
+    currency: null,
     columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
   };
   return analyzeParseResult(parseResult).report;
@@ -28,6 +29,7 @@ export function snapshotFor(txns: NormalizedTransaction[], fileName: string): An
     errors: [],
     warnings: [],
     columns: {},
+    currency: null,
     columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
   };
   return analyzeParseResult(parseResult);

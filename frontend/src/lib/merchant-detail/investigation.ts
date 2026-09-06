@@ -97,7 +97,7 @@ function recurringActions(d: MerchantDetail): InvestigationAction[] {
   if (rec.priceChange) {
     actions.push({
       id: "review-price-change",
-      label: `Review the price change from ${formatMoney(rec.priceChange.from)} to ${formatMoney(rec.priceChange.to)}`,
+      label: `Review the price change from ${formatMoney(rec.priceChange.from, d.currency)} to ${formatMoney(rec.priceChange.to, d.currency)}`,
       priority: "high",
       explanation:
         "Sasscout detected the recurring amount changed within the history. Review it against the expected billing amount — a price change is not a sign of a leak on its own.",
@@ -123,7 +123,7 @@ function recurringActions(d: MerchantDetail): InvestigationAction[] {
       id: "verify-service-in-use",
       label: "Verify whether this service is still actively used",
       priority: "high",
-      explanation: `Sasscout associated about ${formatMoney(d.softwareSpend.estimatedMonthlySpend)}/month of recurring spend with this software merchant. Verify whether the service is still actively used rather than assuming either way.`,
+      explanation: `Sasscout associated about ${formatMoney(d.softwareSpend.estimatedMonthlySpend, d.currency)}/month of recurring spend with this software merchant. Verify whether the service is still actively used rather than assuming either way.`,
     });
     actions.push({
       id: "check-plan-matches",
@@ -153,7 +153,7 @@ function spendActions(d: MerchantDetail): InvestigationAction[] {
       id: "confirm-estimated-spend",
       label: "Confirm the estimated recurring spend",
       priority: "low",
-      explanation: `Sasscout estimated about ${formatMoney(est)}/month of recurring spend from the observed pattern. Confirm this against the actual billing before acting on it.`,
+      explanation: `Sasscout estimated about ${formatMoney(est, d.currency)}/month of recurring spend from the observed pattern. Confirm this against the actual billing before acting on it.`,
     },
   ];
 }

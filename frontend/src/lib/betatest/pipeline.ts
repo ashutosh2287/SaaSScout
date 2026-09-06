@@ -38,7 +38,7 @@ export function analyzeParseResult(parse: ParseResult): AnalysisSnapshot {
   const classification = classifyMerchants(merchants.merchants);
   const recurring = detectRecurring(merchants.transactions);
   const software = aggregateSoftwareSpend(merchants.transactions, classification.merchants, recurring.patterns);
-  const review = detectSpendReviews(software.merchants, quality);
+  const review = detectSpendReviews(software.merchants, quality, parse.currency);
   const report = buildReport(
     { parse, quality, classification, recurring, software, review },
     { generatedAt: "2026-06-30T12:00:00.000Z" },

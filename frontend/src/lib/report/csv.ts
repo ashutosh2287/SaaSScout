@@ -60,6 +60,7 @@ function joinMessages(items: Array<{ message: string }>): string {
 export function serializeReportCsv(report: SasscoutReport): string {
   const lines: string[] = [];
   lines.push(HEADER.join(","));
+  const money = (n: number | null) => fmtMoney(n, report.currency);
 
   for (const m of report.merchants) {
     const rec = m.recurring;
@@ -71,12 +72,12 @@ export function serializeReportCsv(report: SasscoutReport): string {
       joinMessages(m.classification.evidence),
       rec ? RECURRING_STATUS_LABEL[rec.status] : "",
       rec ? CONFIDENCE_LABEL[rec.confidence] : "",
-      fmtMoney(m.typicalTransactionAmount),
+      money(m.typicalTransactionAmount),
       String(m.transactionCount),
       m.firstSeen ?? "",
       m.lastSeen ?? "",
-      fmtMoney(m.estimatedMonthlySpend),
-      fmtMoney(m.estimatedYearlySpend),
+      money(m.estimatedMonthlySpend),
+      money(m.estimatedYearlySpend),
       rv ? REVIEW_STATUS_LABEL[rv.status] : "",
       rv ? CONFIDENCE_LABEL[rv.confidence] : "",
       rv ? String(rv.score) : "",

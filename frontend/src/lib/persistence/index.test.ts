@@ -54,6 +54,7 @@ function sampleReport(overrides?: Partial<SasscoutReport>): SasscoutReport {
       estimatedMonthlyReviewSpend: 50,
       estimatedYearlyReviewSpend: 600,
     },
+    currency: null,
     merchants: [
       {
         normalizedKey: "acme\\inc, \"test\"",

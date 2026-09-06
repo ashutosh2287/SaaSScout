@@ -10,6 +10,7 @@ function baseDetail(overrides?: Partial<MerchantDetail>): MerchantDetail {
     transactionCount: 6,
     rawDescriptorCount: 2,
     rawDescriptors: ["ADOBE CREATIVE CLOUD", "ADOBE CC"],
+    currency: null,
     classification: {
       category: "likely_saas",
       confidence: "high",

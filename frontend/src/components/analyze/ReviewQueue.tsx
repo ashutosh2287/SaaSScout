@@ -50,12 +50,14 @@ export function ReviewQueue({
   strongReviewCount,
   reviewCount,
   onInspect,
+  currency,
 }: {
   reviews: ReviewQueueItem[];
   blocked: boolean;
   strongReviewCount: number;
   reviewCount: number;
   onInspect?: (merchantKey: string) => void;
+  currency?: string | null;
 }) {
   const [filter, setFilter] = useState<ReviewQueueFilter>("all");
   const [sort, setSort] = useState<ReviewQueueSort>("priority");
@@ -134,7 +136,7 @@ export function ReviewQueue({
             ) : (
               <ul className="divide-y divide-zinc-100">
                 {visible.map((item) => (
-                  <ReviewRow key={item.key} item={item} onInspect={onInspect} />
+                  <ReviewRow key={item.key} item={item} onInspect={onInspect} currency={currency} />
                 ))}
               </ul>
             )}
@@ -154,9 +156,11 @@ export function ReviewQueue({
 function ReviewRow({
   item,
   onInspect,
+  currency,
 }: {
   item: ReviewQueueItem;
   onInspect?: (merchantKey: string) => void;
+  currency?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const rec = item.recurringStatus;
@@ -200,11 +204,11 @@ function ReviewRow({
               <span>{strengthLabel[item.recurringStrength]}</span>
             )}
             {item.transactionCount > 0 && <span>· {item.transactionCount} payments</span>}
-            {item.typicalAmount !== null && <span>· typical {formatMoney(item.typicalAmount)}</span>}
+            {item.typicalAmount !== null && <span>· typical {formatMoney(item.typicalAmount, currency)}</span>}
           </p>
         </div>
         <span className="shrink-0 text-sm font-semibold tabular-nums text-zinc-900">
-          {item.estimatedMonthlySpend !== null ? `${formatMoney(item.estimatedMonthlySpend)}/mo` : "—"}
+          {item.estimatedMonthlySpend !== null ? `${formatMoney(item.estimatedMonthlySpend, currency)}/mo` : "—"}
         </span>
       </button>
 
@@ -229,11 +233,11 @@ function ReviewRow({
             </section>
           )}
 
-          {recurringFacts(item).length > 0 && (
+          {recurringFacts(item, currency).length > 0 && (
             <section>
               <p className="text-xs font-semibold text-zinc-500">Recurring pattern details</p>
               <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600">
-                {recurringFacts(item).map((fact, i) => (
+                {recurringFacts(item, currency).map((fact, i) => (
                   <li key={i} className="flex items-start gap-1.5">
                     <span aria-hidden="true" className="mt-0.5 text-zinc-500">•</span>
                     {fact}
@@ -260,9 +264,9 @@ function ReviewRow({
           </section>
           {item.estimatedMonthlySpend !== null && (
             <p className="text-xs text-zinc-500">
-              Estimated {formatMoney(item.estimatedMonthlySpend)}/month
+              Estimated {formatMoney(item.estimatedMonthlySpend, currency)}/month
               {item.estimatedYearlySpend !== null
-                ? ` · ${formatMoney(item.estimatedYearlySpend)}/year`
+                ? ` · ${formatMoney(item.estimatedYearlySpend, currency)}/year`
                 : ""}
             </p>
           )}
@@ -292,7 +296,7 @@ function ReviewRow({
 
 // Counted recurring-pattern facts shown next to the review reasons. Only
 // meaningful, non-empty values are included; wording is observational.
-function recurringFacts(item: ReviewQueueItem): string[] {
+function recurringFacts(item: ReviewQueueItem, currency?: string | null): string[] {
   const facts: string[] = [];
   if (item.transactionCount > 0) {
     facts.push(`${item.transactionCount} payment${item.transactionCount === 1 ? "" : "s"} observed.`);
@@ -310,7 +314,7 @@ function recurringFacts(item: ReviewQueueItem): string[] {
     facts.push(`${item.gapCount} payment gap${item.gapCount === 1 ? "" : "s"} detected.`);
   }
   if (item.priceChange) {
-    facts.push(`A price change was detected from ${formatMoney(item.priceChange.from)} to ${formatMoney(item.priceChange.to)}.`);
+    facts.push(`A price change was detected from ${formatMoney(item.priceChange.from, currency)} to ${formatMoney(item.priceChange.to, currency)}.`);
   }
   return facts;
 }

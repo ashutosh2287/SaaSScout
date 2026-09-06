@@ -135,7 +135,7 @@ export function ComparePanel() {
             file and save again before comparing.
           </p>
 
-          {result && <ResultView result={result} />}
+          {result && <ResultView result={result} currency={current?.report.currency ?? null} />}
         </div>
       )}
     </div>
@@ -147,7 +147,7 @@ function labelOf(saved: SavedAnalysis): string {
   return `${saved.name} (${windowText(w)})`;
 }
 
-function ResultView({ result }: { result: ComparisonResult }) {
+function ResultView({ result, currency }: { result: ComparisonResult; currency?: string | null }) {
   return (
     <div className="mt-8">
       {result.caution && (
@@ -192,7 +192,7 @@ function ResultView({ result }: { result: ComparisonResult }) {
                   {confidenceLabel(f.confidence)}
                 </span>
               </div>
-              {impactLine(f) && <p className="mt-2 text-sm font-medium text-zinc-700">{impactLine(f)}</p>}
+              {impactLine(f, currency) && <p className="mt-2 text-sm font-medium text-zinc-700">{impactLine(f, currency)}</p>}
               <ul className="mt-3 space-y-1.5">
                 {f.evidence.map((e, i) => (
                   <li key={i} className="flex gap-2 text-sm text-zinc-600">

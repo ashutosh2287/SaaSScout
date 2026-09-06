@@ -1,4 +1,5 @@
 import type { ComparisonFinding, ComparisonKind } from "./types";
+import { isCurrencySymbol } from "../parse/currency";
 
 export const KIND_LABEL: Record<ComparisonKind, string> = {
   new_recurring: "New recurring charge",
@@ -19,42 +20,44 @@ export function confidenceLabel(level: ComparisonFinding["confidence"]): string 
   }[level];
 }
 
-export function money(n: number | null): string | null {
+export function money(n: number | null, currency?: string | null): string | null {
   if (n === null) return null;
-  return `$${Math.round(n * 100) / 100}`;
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
+  return `${symbol}${Math.round(n * 100) / 100}`;
 }
 
 function sign(n: number): string {
   return n > 0 ? "+" : "−";
 }
 
-export function impactLine(f: ComparisonFinding): string | null {
+export function impactLine(f: ComparisonFinding, currency?: string | null): string | null {
+  const symbol = isCurrencySymbol(currency) ? currency : "$";
   if (f.kind === "price_increase") {
     const m = f.impact.monthlyDelta;
     const y = f.impact.yearlyDelta;
-    if (m !== null && y !== null) return `Now roughly ${sign(m)}$${m.toFixed(2)} per month, ${sign(y)}$${y.toFixed(2)} per year.`;
-    if (m !== null) return `Now roughly ${sign(m)}$${m.toFixed(2)} per month.`;
+    if (m !== null && y !== null) return `Now roughly ${sign(m)}${symbol}${m.toFixed(2)} per month, ${sign(y)}${symbol}${y.toFixed(2)} per year.`;
+    if (m !== null) return `Now roughly ${sign(m)}${symbol}${m.toFixed(2)} per month.`;
     return null;
   }
   if (f.kind === "price_decrease") {
     const m = f.impact.monthlyDelta;
     const y = f.impact.yearlyDelta;
-    if (m !== null && y !== null) return `Now roughly ${sign(m)}$${m.toFixed(2)} per month, ${sign(y)}$${y.toFixed(2)} per year.`;
-    if (m !== null) return `Now roughly ${sign(m)}$${m.toFixed(2)} per month.`;
+    if (m !== null && y !== null) return `Now roughly ${sign(m)}${symbol}${m.toFixed(2)} per month, ${sign(y)}${symbol}${y.toFixed(2)} per year.`;
+    if (m !== null) return `Now roughly ${sign(m)}${symbol}${m.toFixed(2)} per month.`;
     return null;
   }
   if (f.kind === "new_recurring") {
     if (f.impact.yearlyDelta === null) return null;
-    return `At the current cadence this would add roughly $${f.impact.yearlyDelta.toFixed(2)} per year.`;
+    return `At the current cadence this would add roughly ${symbol}${f.impact.yearlyDelta.toFixed(2)} per year.`;
   }
   if (f.kind === "ended_recurring") {
     if (f.impact.yearlyDelta === null) return null;
-    return `Had the cadence held, this would have been roughly $${(-f.impact.yearlyDelta).toFixed(2)} per year.`;
+    return `Had the cadence held, this would have been roughly ${symbol}${(-f.impact.yearlyDelta).toFixed(2)} per year.`;
   }
   if (f.kind === "frequency_change") {
     if (f.impact.yearlyDelta === null || f.impact.yearlyDelta === 0) return null;
     const dir = f.impact.yearlyDelta > 0 ? "more" : "less";
-    return `Annualized cost moves roughly $${Math.abs(f.impact.yearlyDelta).toFixed(2)} ${dir} per year.`;
+    return `Annualized cost moves roughly ${symbol}${Math.abs(f.impact.yearlyDelta).toFixed(2)} ${dir} per year.`;
   }
   return null;
 }

@@ -17,6 +17,12 @@ export type ClassificationDefinition = {
 
 export const CLASSIFICATION_DICTIONARY: ClassificationDefinition[] = [
   {
+    normalizedKey: "aws",
+    category: "likely_software",
+    confidence: "high",
+    evidence: "Merchant is recognized as a software provider.",
+  },
+  {
     normalizedKey: "adobe",
     category: "likely_software",
     confidence: "high",

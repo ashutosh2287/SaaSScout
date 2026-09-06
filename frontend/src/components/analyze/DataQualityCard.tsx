@@ -30,6 +30,11 @@ export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
       <div className="px-5 py-4">
         <ul className="space-y-2 text-sm">
           <QualityRow label="Dates" value={`${q.date.present.toLocaleString()} present · ${q.date.missing.toLocaleString()} missing`} ok={q.date.missing === 0 || q.date.present >= (q.date.present + q.date.missing) * 0.9} />
+          <QualityRow
+            label="Analyzed window"
+            value={q.date.earliest && q.date.latest ? `${q.date.earliest} to ${q.date.latest}` : "No usable dates"}
+            ok={Boolean(q.date.earliest && q.date.latest)}
+          />
           <QualityRow label="Descriptions" value={`${q.description.missing.toLocaleString()} missing · ${q.description.lowInformation.toLocaleString()} low-information`} ok={q.description.missing === 0} />
           <QualityRow label="Amounts" value={`${q.amount.positive.toLocaleString()} positive · ${q.amount.negative.toLocaleString()} negative · ${q.amount.zero.toLocaleString()} zero`} ok={true} />
           <QualityRow label="Coverage" value={`${q.coverage.dateRangeDays?.toLocaleString() ?? "—"} days${q.coverage.dateRangeDays ? ` · ${q.coverage.monthsRepresented} months` : ""}`} ok={Boolean(q.coverage.dateRangeDays)} />

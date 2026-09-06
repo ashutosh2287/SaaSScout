@@ -67,9 +67,9 @@ export function savedSpend(s: SoftwareSpendSummary): SpendDisplay {
   };
 }
 
-export function displayMoney(n: number | null | undefined): string {
+export function displayMoney(n: number | null | undefined, currency?: string | null): string {
   if (n === null || n === undefined) return "—";
-  return fmtMoney(n);
+  return fmtMoney(n, currency);
 }
 
 export function merchantRecurringLabel(m: ReportMerchant): string {

@@ -94,6 +94,7 @@ function sampleReport(merchants: ReportMerchant[] = []): SasscoutReport {
       estimatedMonthlyReviewSpend: 1499,
       estimatedYearlyReviewSpend: 17988,
     },
+    currency: null,
     merchants,
   };
 }

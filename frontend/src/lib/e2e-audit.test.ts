@@ -120,6 +120,7 @@ function runFullPipeline(transactions: NormalizedTransaction[]) {
       warnings: [],
       columns: {},
       columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+      currency: null,
     },
     quality,
     classification: classificationResult,
@@ -473,6 +474,7 @@ describe("STEP 13 — E2E data consistency audit", () => {
         "softwareSpend",
         "review",
         "merchants",
+        "currency",
       ]);
       for (const key of Object.keys(parsed)) {
         expect(knownKeys.has(key)).toBe(true);

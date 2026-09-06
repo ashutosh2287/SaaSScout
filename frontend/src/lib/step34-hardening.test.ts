@@ -50,6 +50,7 @@ function runReport(txns: NormalizedTransaction[], generatedAt = "2026-01-15T10:0
         warnings: [],
         columns: {},
         columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+        currency: null,
       },
       quality,
       classification: classificationResult,
@@ -510,6 +511,7 @@ describe("STEP 34 — export integrity", () => {
         strongReviewCount: 0, reviewCount: 0, noConcernCount: 0, insufficientEvidenceCount: merchants.length,
         estimatedMonthlyReviewSpend: 0, estimatedYearlyReviewSpend: 0,
       },
+      currency: null,
       merchants,
     };
   }

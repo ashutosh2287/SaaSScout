@@ -98,7 +98,10 @@ export const BENCHMARK_TXNS: NormalizedTransaction[] = [
   // Trailing store/locator number must not create a second merchant.
   { id: "b71", date: "2026-02-04", description: "ADOBE #9901", amount: -60.0, sourceRow: 72 },
   // "AMAZON WEB SERVICES" normalizes to the Amazon merchant identity (mixed ->
-  // unknown) even though AWS bills through the same parent. Hard case.
+  // unknown). It is deliberately not an AWS alias: an off-cycle charge would
+  // break the monthly-cadence evidence the recurring detector asserts for AWS
+  // (per-day different-amount charges are not de-duplicated — documented
+  // limitation). The honest answer for this hard case is "unknown".
   { id: "b72", date: "2026-01-20", description: "AMAZON WEB SERVICES", amount: -92.3, sourceRow: 73 },
 ];
 

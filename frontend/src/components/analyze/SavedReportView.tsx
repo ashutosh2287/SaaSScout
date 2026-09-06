@@ -47,7 +47,7 @@ export function SavedReportView({ saved }: { saved: SavedAnalysis }) {
       </div>
 
       <div className="mt-8">
-        <DashboardMetrics metrics={view.metrics} />
+        <DashboardMetrics metrics={view.metrics} currency={report.currency} />
       </div>
 
       <div className="mt-4">
@@ -57,6 +57,7 @@ export function SavedReportView({ saved }: { saved: SavedAnalysis }) {
           strongReviewCount={report.review.strongReviewCount}
           reviewCount={report.review.reviewCount}
           onInspect={merchantDetail.inspect}
+          currency={report.currency}
         />
       </div>
 
@@ -66,7 +67,7 @@ export function SavedReportView({ saved }: { saved: SavedAnalysis }) {
         <RecurringCard s={recurringSummary} />
       </div>
 
-      <SoftwareBreakdown rows={view.softwareRows} onInspect={merchantDetail.inspect} />
+      <SoftwareBreakdown rows={view.softwareRows} onInspect={merchantDetail.inspect} currency={report.currency} />
 
       <div className="mt-4">
         <DataQualityCard q={report.quality} />

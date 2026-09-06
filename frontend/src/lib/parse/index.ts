@@ -16,6 +16,7 @@ function emptyResult(name: string, errors: ParseError[], totalRows = 0): ParseRe
     warnings: [],
     columns: {},
     columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+    currency: null,
   };
 }
 
@@ -47,6 +48,14 @@ function normalizeRows(
     }
   }
 
+  // Statement currency: only when every parsed row with evidence agrees on one.
+  // Mixed or silent files are honestly "unknown" rather than guessed.
+  const currencies = new Set<string>();
+  for (const t of transactions) {
+    if (t.currency) currencies.add(t.currency);
+  }
+  const currency = currencies.size === 1 ? [...currencies][0] : null;
+
   return {
     file: { name: fileName },
     transactions,
@@ -57,6 +66,7 @@ function normalizeRows(
     warnings,
     columns: cols.detected,
     columnDiagnostics: cols,
+    currency,
   };
 }
 

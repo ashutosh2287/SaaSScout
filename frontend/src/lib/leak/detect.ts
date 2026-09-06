@@ -78,6 +78,7 @@ const EMPTY_SUMMARY: ReviewSummary = {
 export function detectSpendReviews(
   merchants: SoftwareSpendMerchant[],
   quality: DataQualityDiagnostics,
+  currency?: string | null,
 ): SpendReviewResult {
   const summary: ReviewSummary = { ...EMPTY_SUMMARY };
   const reviews: SpendReview[] = [];
@@ -88,7 +89,7 @@ export function detectSpendReviews(
 
   for (const m of merchants) {
     let status: ReviewStatus;
-    let reasons = buildReasons(m);
+    let reasons = buildReasons(m, currency);
 
     if (blocked) {
       status = "insufficient_evidence";

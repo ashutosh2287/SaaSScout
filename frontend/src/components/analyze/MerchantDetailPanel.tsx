@@ -38,8 +38,8 @@ const PRIORITY_TONE: Record<string, string> = {
 };
 
 // Render a dash for an unavailable value rather than fabricating $0.
-function money(n: number | null | undefined): string {
-  return formatMoney(n);
+function money(n: number | null | undefined, currency?: string | null): string {
+  return formatMoney(n, currency);
 }
 
 export function MerchantDetailPanel({ detail }: { detail: MerchantDetail }) {
@@ -113,7 +113,7 @@ export function MerchantDetailPanel({ detail }: { detail: MerchantDetail }) {
         <h3 id="detail-recurring" className="text-xs font-semibold text-zinc-500">
           Recurring pattern
         </h3>
-        <RecurringSection recurring={recurring} />
+        <RecurringSection recurring={recurring} currency={detail.currency} />
       </section>
 
       {/* Software spend */}
@@ -124,18 +124,18 @@ export function MerchantDetailPanel({ detail }: { detail: MerchantDetail }) {
         <ul className="mt-1 space-y-1 text-sm text-zinc-600">
           <li>
             Total historical spend{" "}
-            <span className="font-medium text-zinc-900">{money(softwareSpend.totalSpend)}</span>
+            <span className="font-medium text-zinc-900">{money(softwareSpend.totalSpend, detail.currency)}</span>
           </li>
           <li>
             Estimated recurring spend{" "}
             <span className="font-medium text-zinc-900">
-              {money(softwareSpend.estimatedMonthlySpend)}/month
+              {money(softwareSpend.estimatedMonthlySpend, detail.currency)}/month
             </span>
           </li>
           <li>
             Estimated recurring spend{" "}
             <span className="font-medium text-zinc-900">
-              {money(softwareSpend.estimatedYearlySpend)}/year
+              {money(softwareSpend.estimatedYearlySpend, detail.currency)}/year
             </span>
           </li>
         </ul>
@@ -173,8 +173,10 @@ function classificationEvidenceList(d: MerchantDetail) {
 
 function RecurringSection({
   recurring,
+  currency,
 }: {
   recurring: MerchantDetail["recurring"];
+  currency?: string | null;
 }) {
   if (!recurring.status) {
     return (
@@ -192,7 +194,7 @@ function RecurringSection({
     facts.push(`${recurring.paymentCount} payment${recurring.paymentCount === 1 ? "" : "s"} observed`);
   }
   if (recurring.typicalAmount !== null) {
-    facts.push(`Typical amount ${money(recurring.typicalAmount)}`);
+    facts.push(`Typical amount ${money(recurring.typicalAmount, currency)}`);
   }
   if (recurring.amountProfile && recurring.amountProfile !== "insufficient_evidence") {
     facts.push(`Payments are ${amountStabilityLabel[recurring.amountProfile].toLowerCase()} in amount`);
@@ -234,8 +236,8 @@ function RecurringSection({
       )}
       {recurring.priceChange && (
         <p className="mt-1 text-sm text-zinc-600">
-          A price change was detected from {money(recurring.priceChange.from)} to{" "}
-          {money(recurring.priceChange.to)}.
+          A price change was detected from {money(recurring.priceChange.from, currency)} to{" "}
+          {money(recurring.priceChange.to, currency)}.
         </p>
       )}
       {recurring.evidence.length === 0 ? (

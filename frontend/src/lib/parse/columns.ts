@@ -18,6 +18,7 @@ const DESCRIPTION_NAMES = [
 const AMOUNT_NAMES = ["amount", "transaction amount", "value", "total", "sum"];
 const DEBIT_NAMES = ["debit", "debit amount", "withdrawal"];
 const CREDIT_NAMES = ["credit", "credit amount", "deposit"];
+const CURRENCY_NAMES = ["currency", "ccy", "currency code", "iso currency", "currency symbol", "cur"];
 
 function find(normalized: string[], names: string[], used: Set<number>): string | undefined {
   const idx = names
@@ -39,6 +40,7 @@ export function detectColumns(headerRow: string[]): ColumnDiagnostics {
   const credit = find(normalized, CREDIT_NAMES, used);
   // Only look for a unified amount column if debit/credit pair did not match.
   const amount = find(normalized, AMOUNT_NAMES, used);
+  const currency = find(normalized, CURRENCY_NAMES, used);
 
   const detected: ColumnMap = {
     date,
@@ -46,6 +48,7 @@ export function detectColumns(headerRow: string[]): ColumnDiagnostics {
     amount,
     debit,
     credit,
+    currency,
   };
 
   const missing: string[] = [];

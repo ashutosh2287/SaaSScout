@@ -46,9 +46,11 @@ function isConcreteRecurring(m: DashboardMerchantRow): boolean {
 export function SoftwareBreakdown({
   rows,
   onInspect,
+  currency,
 }: {
   rows: DashboardMerchantRow[];
   onInspect?: (merchantKey: string) => void;
+  currency?: string | null;
 }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const ordered = [...rows].sort((a, b) => (b.totalSpend ?? 0) - (a.totalSpend ?? 0));
@@ -92,6 +94,7 @@ export function SoftwareBreakdown({
                     open={open}
                     onToggle={() => setOpenKey(open ? null : m.normalizedKey)}
                     onInspect={onInspect}
+                    currency={currency}
                   />
                 );
               })}
@@ -109,12 +112,14 @@ function RecurringMerchantRow({
   open,
   onToggle,
   onInspect,
+  currency,
 }: {
   m: DashboardMerchantRow;
   expandable: boolean;
   open: boolean;
   onToggle: () => void;
   onInspect?: (merchantKey: string) => void;
+  currency?: string | null;
 }) {
   const recurring = isConcreteRecurring(m);
   const evidenceId = uniquePanelId("rec-evidence", m.normalizedKey);
@@ -156,8 +161,8 @@ function RecurringMerchantRow({
           )}
         </td>
         <td className="px-5 py-3 text-right tabular-nums text-zinc-500">{m.transactionCount}</td>
-        <td className="px-5 py-3 text-right tabular-nums text-zinc-700">{formatMoney(m.typicalAmount)}</td>
-        <td className="px-5 py-3 text-right tabular-nums text-zinc-700">{formatMoney(m.estimatedMonthlySpend)}</td>
+        <td className="px-5 py-3 text-right tabular-nums text-zinc-700">{formatMoney(m.typicalAmount, currency)}</td>
+        <td className="px-5 py-3 text-right tabular-nums text-zinc-700">{formatMoney(m.estimatedMonthlySpend, currency)}</td>
         <td className="px-5 py-3">
           {m.reviewStatus && m.reviewStatus !== "no_concern" ? (
             <span
@@ -196,9 +201,9 @@ function RecurringMerchantRow({
                   </li>
                 ))}
               </ul>
-              {breakdownFacts(m).length > 0 && (
+              {breakdownFacts(m, currency).length > 0 && (
                 <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600">
-                  {breakdownFacts(m).map((fact, i) => (
+                  {breakdownFacts(m, currency).map((fact, i) => (
                     <li key={`f${i}`} className="flex items-start gap-1.5">
                       <span aria-hidden="true" className="mt-0.5 text-zinc-500">•</span>
                       {fact}
@@ -208,12 +213,12 @@ function RecurringMerchantRow({
               )}
               <p className="text-xs text-zinc-500">
                 {m.transactionCount} payment{m.transactionCount === 1 ? "" : "s"} · typical{" "}
-                {formatMoney(m.typicalAmount)}
+                {formatMoney(m.typicalAmount, currency)}
                 {m.estimatedMonthlySpend !== null
-                  ? ` · est. ${formatMoney(m.estimatedMonthlySpend)}/month`
+                  ? ` · est. ${formatMoney(m.estimatedMonthlySpend, currency)}/month`
                   : ""}
                 {m.estimatedYearlySpend !== null
-                  ? ` · ${formatMoney(m.estimatedYearlySpend)}/year`
+                  ? ` · ${formatMoney(m.estimatedYearlySpend, currency)}/year`
                   : ""}
               </p>
               <p className="text-xs text-zinc-500">
@@ -239,7 +244,7 @@ function RecurringMerchantRow({
 }
 
 // Counted, observational recurring-pattern facts for a breakdown row.
-function breakdownFacts(m: DashboardMerchantRow): string[] {
+function breakdownFacts(m: DashboardMerchantRow, currency?: string | null): string[] {
   const facts: string[] = [];
   if (m.amountProfile && m.amountProfile !== "insufficient_evidence") {
     facts.push(`Payments are ${amountStabilityLabel[m.amountProfile].toLowerCase()} in amount.`);
@@ -254,7 +259,7 @@ function breakdownFacts(m: DashboardMerchantRow): string[] {
     facts.push(`${m.gapCount} payment gap${m.gapCount === 1 ? "" : "s"} detected.`);
   }
   if (m.priceChange) {
-    facts.push(`A price change was detected from ${formatMoney(m.priceChange.from)} to ${formatMoney(m.priceChange.to)}.`);
+    facts.push(`A price change was detected from ${formatMoney(m.priceChange.from, currency)} to ${formatMoney(m.priceChange.to, currency)}.`);
   }
   return facts;
 }

@@ -17,9 +17,9 @@ import { REVIEW_QUEUE_ORDER } from "./types";
 // Single presentation formatter shared by the dashboard. Delegates to the
 // existing report fmtMoney so live and saved views render identically.
 
-export function formatMoney(n: number | null | undefined): string {
+export function formatMoney(n: number | null | undefined, currency?: string | null): string {
   if (n === null || n === undefined) return "—";
-  return fmtMoney(n);
+  return fmtMoney(n, currency);
 }
 
 // ---------- row adapters ----------

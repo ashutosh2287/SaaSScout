@@ -1,23 +1,23 @@
 import type { SoftwareSpendResult } from "@/lib/software";
 import { formatMoney } from "@/lib/dashboard";
 
-export function SoftwareSpendCard({ result }: { result: SoftwareSpendResult }) {
+export function SoftwareSpendCard({ result, currency }: { result: SoftwareSpendResult; currency?: string | null }) {
   const s = result.summary;
 
   const stat = [
     {
       label: "Total software spend",
-      value: formatMoney(s.totalSoftwareSpend),
+      value: formatMoney(s.totalSoftwareSpend, currency),
       cls: "text-zinc-900",
     },
     {
       label: "Est. monthly recurring",
-      value: formatMoney(s.estimatedMonthlySpend),
+      value: formatMoney(s.estimatedMonthlySpend, currency),
       cls: "text-emerald-700",
     },
     {
       label: "Est. yearly recurring",
-      value: formatMoney(s.estimatedYearlySpend),
+      value: formatMoney(s.estimatedYearlySpend, currency),
       cls: "text-emerald-700",
     },
     {
@@ -60,8 +60,8 @@ export function SoftwareSpendCard({ result }: { result: SoftwareSpendResult }) {
               {s.topSoftwareByTotal.map((m) => (
                 <tr key={m.normalizedKey}>
                   <td className="px-4 py-2.5 text-zinc-900">{m.displayName}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-700">{formatMoney(m.totalSpend)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-700">{formatMoney(m.estimatedMonthlySpend)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-700">{formatMoney(m.totalSpend, currency)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums text-zinc-700">{formatMoney(m.estimatedMonthlySpend, currency)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-zinc-500">{m.transactionCount}</td>
                 </tr>
               ))}

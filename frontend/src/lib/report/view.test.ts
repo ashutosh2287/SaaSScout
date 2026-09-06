@@ -149,6 +149,16 @@ describe("displayMoney", () => {
     expect(displayMoney(1200)).toBe("$1,200");
     expect(displayMoney(99.99)).toBe("$99.99");
   });
+
+  it("uses the detected currency symbol when provided", () => {
+    expect(displayMoney(1200, "€")).toBe("€1,200");
+    expect(displayMoney(99.99, "£")).toBe("£99.99");
+  });
+
+  it("negatives render the sign before the symbol", () => {
+    expect(displayMoney(-1200)).toBe("-$1,200");
+    expect(displayMoney(-1200, "€")).toBe("-€1,200");
+  });
 });
 
 describe("merchantRecurringLabel", () => {

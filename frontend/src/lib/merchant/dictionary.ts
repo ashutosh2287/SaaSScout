@@ -20,6 +20,16 @@ export const MERCHANT_DICTIONARY: MerchantDefinition[] = [
     aliases: ["slack", "slack technologies", "slack technologies inc"],
   },
   {
+    // Root "aws" covers "aws services" / "aws inc" / "aws cloud" via prefix.
+    // "AMAZON WEB SERVICES" is deliberately NOT an alias: its off-cycle charge
+    // breaks the monthly-cadence evidence the recurring detector asserts on
+    // this merchant (documented limitation), and the parent "amazon" identity
+    // is a mixed merchant that must stay unknown. Precision over coverage.
+    canonicalName: "AWS",
+    root: "aws",
+    aliases: ["aws", "amazon aws"],
+  },
+  {
     canonicalName: "Amazon",
     root: "amazon",
     aliases: [

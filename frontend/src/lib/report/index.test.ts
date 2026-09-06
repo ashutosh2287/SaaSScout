@@ -87,6 +87,7 @@ function parseResult(): ParseResult {
     warnings: [],
     columns: {},
     columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+    currency: null,
   };
 }
 

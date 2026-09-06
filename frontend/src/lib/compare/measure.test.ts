@@ -26,6 +26,7 @@ function buildReportFor(txns: NormalizedTransaction[], fileName: string): Sassco
     warnings: [],
     columns: {},
     columnDiagnostics: { detected: {}, missing: [], ambiguous: [] },
+    currency: null,
   };
   const quality = inspectDataQuality(txns);
   const merchantResult = normalizeMerchants(txns);

@@ -45,6 +45,7 @@ function sampleReport(): SasscoutReport {
       estimatedMonthlyReviewSpend: 50,
       estimatedYearlyReviewSpend: 600,
     },
+    currency: null,
     merchants: [
       {
         normalizedKey: "acme-inc",

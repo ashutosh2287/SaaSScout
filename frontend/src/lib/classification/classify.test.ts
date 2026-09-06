@@ -99,7 +99,7 @@ describe("Step 7 classification", () => {
 
     it("classifies an explicit AWS description as software", () => {
       const { classificationResult } = runPipeline();
-      const aws = byName(classificationResult.merchants, "Aws");
+      const aws = byName(classificationResult.merchants, "AWS");
       expect(aws?.classification.category).toBe("likely_software");
     });
   });
@@ -189,11 +189,11 @@ describe("Step 7 classification", () => {
       const s = classificationResult.summary;
       // 14 merchants: Adobe(likely_software) Slack, Figma(2 saas) = but Slack/Figma = 2 saas
       // grocery, restaurant, utility = 3 not_software
-      // paypal(unknown) amazon(unknown) amazon+aws grouped=mixed(unknown) unknown business(unknown)
-      // online sub(unknown) pro digital(unknown) aws(likely_software)
+      // paypal(unknown) amazon(unknown, mixed) unknown business(unknown)
+      // online sub(unknown) pro digital(unknown) aws(likely_software; AMAZON AWS is an AWS alias)
       expect(s.totalClassified).toBe(classificationResult.merchants.length);
       expect(s.likelySaasCount).toBe(2); // Slack, Figma
-      expect(s.likelySoftwareCount).toBe(2); // Adobe, Aws
+      expect(s.likelySoftwareCount).toBe(2); // Adobe, AWS
       expect(s.notSoftwareCount).toBe(3);
       expect(s.unknownCount).toBe(s.needsReview);
     });

@@ -44,6 +44,7 @@ export function buildReport(
       parsedRows: parse.parsedRows,
       skippedRows: parse.skippedRows,
     },
+    currency: parse.currency ?? null,
     quality,
     classification: classification.summary,
     softwareSpend: software.summary,

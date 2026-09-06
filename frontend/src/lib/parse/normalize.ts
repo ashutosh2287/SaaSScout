@@ -1,4 +1,5 @@
 import { parseAmount } from "./amounts";
+import { detectCurrencyFromCell, detectCurrencyFromText } from "./currency";
 import { parseDate } from "./dates";
 import type { ColumnMap, NormalizedTransaction, ParseError, ParseWarning } from "./types";
 
@@ -31,6 +32,7 @@ export function normalizeRow(
 
   const description = pick(row, cols.description, headerIndex);
   const dateRaw = pick(row, cols.date, headerIndex);
+  const currency = rowCurrency(row, cols, headerIndex);
 
   let amount: number | null = null;
   let amountError: ParseError | null = null;
@@ -106,9 +108,28 @@ export function normalizeRow(
       description: description === "" ? "(no description)" : description,
       amount,
       sourceRow,
+      ...(currency ? { currency } : {}),
     },
     warnings,
   };
+}
+
+// Currency evidence for this row: a dedicated currency column wins, otherwise
+// scan the amount/debit/credit cells. Unknown (null) is honest — no inference.
+function rowCurrency(
+  row: string[],
+  cols: ColumnMap,
+  headerIndex: Record<string, number>,
+): string | null {
+  const amountCells: unknown[] = [];
+  if (cols.amount !== undefined) amountCells.push(pick(row, cols.amount, headerIndex));
+  if (cols.debit !== undefined) amountCells.push(pick(row, cols.debit, headerIndex));
+  if (cols.credit !== undefined) amountCells.push(pick(row, cols.credit, headerIndex));
+  if (cols.currency !== undefined) {
+    const fromColumn = detectCurrencyFromCell(pick(row, cols.currency, headerIndex));
+    if (fromColumn) return fromColumn;
+  }
+  return detectCurrencyFromText(amountCells.join(" "));
 }
 
 function pick(row: string[], colName: string | undefined, headerIndex: Record<string, number>): string {
@@ -122,7 +143,7 @@ export function buildHeaderIndex(cols: ColumnMap, headerRow: string[]): Record<s
   const index: Record<string, number> = {};
   const norm = headerRow.map((h) => h.trim().toLowerCase().replace(/[^a-z0-9]+/g, " "));
   const names = new Set(
-    [cols.date, cols.description, cols.amount, cols.debit, cols.credit].filter(Boolean) as string[],
+    [cols.date, cols.description, cols.amount, cols.debit, cols.credit, cols.currency].filter(Boolean) as string[],
   );
   norm.forEach((n, i) => {
     if (n !== "" && names.has(n)) index[n] = i;
