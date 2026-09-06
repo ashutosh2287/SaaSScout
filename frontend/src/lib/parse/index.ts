@@ -69,9 +69,22 @@ export async function parseFile(file: File): Promise<ParseResult> {
 
   if (ext === "xlsx") {
     const buffer = await file.arrayBuffer();
-    const ws = await readWorksheet(buffer);
-    header = ws.header;
-    rows = ws.rows;
+    let worksheet: { header: string[]; rows: string[][] };
+    try {
+      worksheet = await readWorksheet(buffer);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "The workbook could not be read.";
+      if (message.includes("EMPTY_FILE")) {
+        // Empty workbook: resolve as a controlled, structured result so the
+        // caller never sees an unhandled rejection for a user-picked file.
+        return emptyResult(file.name, [{ code: "EMPTY_FILE", message: "The workbook is empty; there is no data to analyze." }]);
+      }
+      // Decompression-bomb and corrupt-workbook hazards keep the established
+      // contract (rejection with a typed code), per STEP 36.
+      throw err;
+    }
+    header = worksheet.header;
+    rows = worksheet.rows;
   } else {
     // Assumption: UTF-8 encoded CSV text. Not all CSVs are UTF-8; full encoding
     // detection is out of scope for V1. Non-UTF-8 files may misread characters.
