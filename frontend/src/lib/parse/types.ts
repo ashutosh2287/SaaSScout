@@ -5,6 +5,10 @@ export type NormalizedTransaction = {
   amount: number;
   currency?: string;
   sourceRow: number;
+  // Step 28 — multi-source tag. Set when a transaction came from one of
+  // several parsed files. Undefined for the single-file path so every
+  // existing call site keeps its behaviour.
+  source?: string;
 };
 
 export type ColumnMap = {
@@ -56,4 +60,12 @@ export type ParseResult = {
   // file gives no consistent, unambiguous evidence. null means "unknown", not
   // "US dollars".
   currency: string | null;
+  // Step 28 — when multiple files were parsed, a per-source breakdown. For a
+  // single-file parse this is `[primary]` (length === 1).
+  sources?: Array<{
+    label: string;
+    transactionCount: number;
+    parsedRows: number;
+    skippedRows: number;
+  }>;
 };

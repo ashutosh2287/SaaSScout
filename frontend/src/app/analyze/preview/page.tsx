@@ -12,6 +12,7 @@ import { DataQualityCard } from "@/components/analyze/DataQualityCard";
 import { RecurringCard } from "@/components/analyze/RecurringCard";
 import { ExportCard } from "@/components/analyze/ExportCard";
 import { SaveAnalysisCard } from "@/components/analyze/SaveAnalysisCard";
+import { CrossSourceBreakdown } from "@/components/analyze/CrossSourceBreakdown";
 import { useMerchantDetail } from "@/components/analyze/MerchantDetailView";
 import { categoryLabel, categoryTone } from "@/components/analyze/classificationLabels";
 import { intervalLabel, statusLabel, statusTone } from "@/components/analyze/recurringLabels";
@@ -26,6 +27,7 @@ import { aggregateSoftwareSpend } from "@/lib/software";
 import { detectSpendReviews } from "@/lib/leak";
 import { buildReport } from "@/lib/report";
 import { deriveDashboard, reviewFromSpendReview, rowFromSoftwareMerchant } from "@/lib/dashboard";
+import { deriveSourceBreakdown } from "@/lib/dashboard/source-breakdown";
 
 const PREVIEW_ROWS = 20;
 
@@ -114,6 +116,12 @@ function PreviewContent({
   const queueItems = reviewResult.reviews.map(reviewFromSpendReview);
   const blocked = quality.analysisReadiness === "blocked";
 
+  // Step 28 — cross-source attribution. Only meaningful when the user
+  // uploaded more than one file (the parser tags transactions with a
+  // source label) and the engine found software merchants to split.
+  const sourceLabels = (result.sources ?? []).map((s) => s.label);
+  const crossSource = deriveSourceBreakdown(report, result.transactions, sourceLabels);
+
   return (
     <div className="min-h-screen bg-canvas">
       <header className="border-b border-line bg-surface">
@@ -186,6 +194,8 @@ function PreviewContent({
           <div className="mt-8">
             <DashboardMetrics metrics={view.metrics} currency={result.currency} />
           </div>
+
+          <CrossSourceBreakdown breakdown={crossSource} currency={result.currency} />
 
           <div className="mt-4">
             <ReviewQueue
