@@ -24,7 +24,7 @@ export function DashboardPreview() {
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
             <span className="h-2.5 w-2.5 rounded-full bg-zinc-300" />
-            <span className="ml-3 font-mono text-xs text-ink-3">Sasscout · Spend overview · Sample data</span>
+            <span className="ml-3 font-mono text-xs text-ink-2">Sasscout · Spend overview · Sample data</span>
           </div>
 
           <div className="grid gap-px bg-line md:grid-cols-4">

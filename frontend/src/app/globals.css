@@ -81,8 +81,8 @@
   --ink: oklch(0.21 0.006 285.885);
   --ink-2: oklch(0.442 0.017 285.786);
   --ink-3: oklch(0.552 0.016 285.938);
-  --brand: oklch(0.596 0.145 163.225);
-  --brand-hover: oklch(0.508 0.118 165.612);
+  --brand: oklch(0.508 0.118 165.612);
+  --brand-hover: oklch(0.432 0.095 166.913);
   --brand-ink: #ffffff;
   --brand-soft: oklch(0.95 0.052 163.051);
   --brand-line: oklch(0.905 0.093 164.15);
