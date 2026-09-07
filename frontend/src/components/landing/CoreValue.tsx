@@ -10,7 +10,7 @@ const sources = [
 
 export function CoreValue() {
   return (
-    <section id="product" className="scroll-mt-20 border-t border-zinc-200 bg-zinc-50 py-16 sm:py-24">
+    <section id="product" className="scroll-mt-20 border-t border-line bg-canvas py-16 sm:py-24">
       <Container>
         <SectionHeading
           eyebrow="The problem"
@@ -27,7 +27,7 @@ export function CoreValue() {
             {sources.map((s) => (
               <div
                 key={s.label}
-                className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-sm"
+                className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-surface px-4 py-4 shadow-sm"
               >
                 <span
                   aria-hidden="true"

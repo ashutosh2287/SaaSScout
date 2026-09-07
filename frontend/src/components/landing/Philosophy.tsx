@@ -5,7 +5,7 @@ const tiers = [
   {
     label: "Detected",
     tone: "bg-emerald-50 text-emerald-700",
-    dot: "bg-emerald-700",
+    dot: "bg-brand",
     body: "Strong recurring payment pattern detected.",
   },
   {
@@ -24,7 +24,7 @@ const tiers = [
 
 export function Philosophy() {
   return (
-    <section id="why" className="scroll-mt-20 border-t border-zinc-200 bg-zinc-50 py-16 sm:py-24">
+    <section id="why" className="scroll-mt-20 border-t border-line bg-canvas py-16 sm:py-24">
       <Container>
         <SectionHeading
           eyebrow="Product philosophy"
@@ -35,7 +35,7 @@ export function Philosophy() {
           {tiers.map((t) => (
             <li
               key={t.label}
-              className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm"
+              className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm"
             >
               <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${t.dot}`} />
               <span className={`w-32 shrink-0 rounded-full px-2.5 py-1 text-center text-xs font-semibold ${t.tone}`}>

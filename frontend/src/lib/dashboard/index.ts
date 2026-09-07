@@ -1,4 +1,5 @@
 export {
+  countReviewQueue,
   deriveDashboard,
   deriveMetrics,
   filterAndSortReviews,
@@ -7,6 +8,7 @@ export {
   rowFromReportMerchant,
   rowFromSoftwareMerchant,
 } from "./derive";
+export type { ReviewQueueCounts } from "./derive";
 export type {
   DashboardMerchantRow,
   DashboardMetrics,

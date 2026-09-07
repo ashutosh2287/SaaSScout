@@ -41,7 +41,7 @@ export function ServiceStatusBar() {
     <div
       role="status"
       aria-live="polite"
-      className="border-b border-zinc-200 bg-white px-4 py-1.5 text-center"
+      className="border-b border-zinc-200 bg-surface px-4 py-1.5 text-center"
     >
       <span className={`inline-flex items-center gap-2 text-xs font-medium ${text}`}>
         <span aria-hidden="true" className={`h-2 w-2 rounded-full ${dot}`} />

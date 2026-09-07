@@ -22,3 +22,6 @@ npm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Local-only data dirs (vector DB experiments, dev caches)
+LanceDB/

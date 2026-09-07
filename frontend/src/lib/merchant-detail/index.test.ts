@@ -93,6 +93,7 @@ function sampleReport(merchants: ReportMerchant[] = []): SasscoutReport {
       insufficientEvidenceCount: 0,
       estimatedMonthlyReviewSpend: 1499,
       estimatedYearlyReviewSpend: 17988,
+      unclearOwnershipCount: 0,
     },
     currency: null,
     merchants,

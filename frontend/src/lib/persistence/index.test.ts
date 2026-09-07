@@ -53,6 +53,7 @@ function sampleReport(overrides?: Partial<SasscoutReport>): SasscoutReport {
       insufficientEvidenceCount: 0,
       estimatedMonthlyReviewSpend: 50,
       estimatedYearlyReviewSpend: 600,
+      unclearOwnershipCount: 0,
     },
     currency: null,
     merchants: [

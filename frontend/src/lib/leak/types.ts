@@ -31,7 +31,15 @@ export type ReviewReasonType =
   | "insufficient_history"
   | "uncertain_classification"
   | "weak_recurring_evidence"
-  | "poor_data_quality";
+  | "poor_data_quality"
+  // Step 27 — a recurring software merchant that the classification engine
+  // could not identify by name or pattern. The recurring engine says this
+  // is a sustained software bill; the classification engine says it is not
+  // in the dictionary and the descriptions do not match a known category.
+  // The honest read: the engine cannot say who or what owns this expense,
+  // so the owner should confirm. A new instance of this reason on the same
+  // merchant always fires after `uncertain_classification` is present.
+  | "unclear_ownership";
 
 export type ReviewReason = {
   type: ReviewReasonType;
@@ -67,6 +75,14 @@ export type ReviewSummary = {
 
   estimatedMonthlyReviewSpend: number;
   estimatedYearlyReviewSpend: number;
+
+  // Step 27 — count of reviews carrying the `unclear_ownership` reason
+  // (a recurring-software merchant that the classification engine could
+  // not identify by name or pattern). Surfaces as a single "vendors
+  // without an obvious owner" badge in the UI; does not change the
+  // review/strong_review count itself because a merchant can carry the
+  // reason in addition to its other reasons.
+  unclearOwnershipCount: number;
 };
 
 export type SpendReviewResult = {

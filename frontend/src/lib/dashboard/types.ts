@@ -63,7 +63,12 @@ export type ReviewQueueItem = {
   recurringEvidence: string[];
 };
 
-export type ReviewQueueFilter = "all" | "strong_review" | "review" | "insufficient_evidence";
+export type ReviewQueueFilter =
+  | "all"
+  | "actionable" // Step 23 presentation preset: strong_review ∪ review (the genuinely actionable rows).
+  | "strong_review"
+  | "review"
+  | "insufficient_evidence";
 
 export type ReviewQueueSort =
   | "priority"

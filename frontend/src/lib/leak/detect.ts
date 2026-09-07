@@ -73,6 +73,7 @@ const EMPTY_SUMMARY: ReviewSummary = {
   insufficientEvidenceCount: 0,
   estimatedMonthlyReviewSpend: 0,
   estimatedYearlyReviewSpend: 0,
+  unclearOwnershipCount: 0,
 };
 
 export function detectSpendReviews(
@@ -104,6 +105,24 @@ export function detectSpendReviews(
           reasons.push({
             type: "uncertain_classification",
             message: "Merchant classification is uncertain.",
+          });
+        }
+      }
+      // Step 27 — a recurring-software merchant whose classification the
+      // engine could not identify is a real "vendor without owner" signal:
+      // the recurring engine says this is a sustained software bill, but
+      // the dictionary / pattern matching did not recognize the name. The
+      // gate is the intersection of two things the engine already
+      // computes, so this finding is exactly as trustworthy as the
+      // classification and recurring layers separately.
+      if (
+        (status === "review" || status === "strong_review") &&
+        m.classification.category === "unknown"
+      ) {
+        if (!reasons.some((r) => r.type === "unclear_ownership")) {
+          reasons.push({
+            type: "unclear_ownership",
+            message: "Recurring software spend whose vendor the engine could not identify by name or category pattern — confirm who owns this expense.",
           });
         }
       }
@@ -164,6 +183,11 @@ export function detectSpendReviews(
     if (status === "review" || status === "strong_review") {
       if (m.estimatedMonthlySpend !== null) summary.estimatedMonthlyReviewSpend += m.estimatedMonthlySpend;
       if (m.estimatedYearlySpend !== null) summary.estimatedYearlyReviewSpend += m.estimatedYearlySpend;
+    }
+    // Step 27 — track merchants carrying the unclear_ownership reason so the
+    // UI can show a single "vendors without an obvious owner" badge.
+    if (reasons.some((r) => r.type === "unclear_ownership")) {
+      summary.unclearOwnershipCount += 1;
     }
   }
 

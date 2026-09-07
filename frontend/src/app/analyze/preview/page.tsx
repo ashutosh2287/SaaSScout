@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { buttonClasses } from "@/components/ui/Button";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { DashboardMetrics } from "@/components/analyze/DashboardMetrics";
 import { ReviewQueue } from "@/components/analyze/ReviewQueue";
 import { SoftwareBreakdown } from "@/components/analyze/SoftwareBreakdown";
@@ -37,18 +40,23 @@ export default function PreviewPage() {
 
   if (!result) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 py-24">
-        <Container className="max-w-md text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">No file selected.</h1>
-          <p className="mt-3 text-zinc-600">Select a CSV or XLSX file to see its preview.</p>
-          <span className="mt-6 inline-flex">
-            <Link
-              href="/analyze"
-              className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
-            >
-              Choose a file
-            </Link>
-          </span>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 py-24">
+        <Container className="max-w-md">
+          <EmptyState
+            icon={
+              <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+              </svg>
+            }
+            title="No file selected."
+            description="Select a CSV or XLSX file to see its preview."
+            action={
+              <Link href="/analyze" className={buttonClasses("primary", "md")}>
+                Choose a file
+              </Link>
+            }
+          />
         </Container>
       </div>
     );
@@ -107,18 +115,13 @@ function PreviewContent({
   const blocked = quality.analysisReadiness === "blocked";
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="min-h-screen bg-canvas">
+      <header className="border-b border-line bg-surface">
         <Container className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
-              S
-            </span>
-            <span className="text-lg font-semibold tracking-tight text-zinc-900">Sasscout</span>
-          </Link>
+          <BrandMark />
           <Link
             href="/analyze"
-            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+            className="text-sm font-medium text-ink-2 transition-colors hover:text-ink"
           >
             Choose a different file
           </Link>
@@ -138,20 +141,20 @@ function PreviewContent({
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Rows found</p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{totalRows.toLocaleString()}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Transactions parsed</p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-700">{parsedRows.toLocaleString()}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Skipped</p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{result.skippedRows.toLocaleString()}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Need attention</p>
+            <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+               <p className="font-mono text-[11px] text-ink-3">rows found</p>
+               <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{totalRows.toLocaleString()}</p>
+             </div>
+             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+               <p className="font-mono text-[11px] text-ink-3">transactions parsed</p>
+               <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-700">{parsedRows.toLocaleString()}</p>
+             </div>
+             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+               <p className="font-mono text-[11px] text-ink-3">skipped</p>
+               <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{result.skippedRows.toLocaleString()}</p>
+             </div>
+             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+               <p className="font-mono text-[11px] text-ink-3">need attention</p>
               <p className="mt-1 text-2xl font-semibold tracking-tight text-amber-700">{attentionCount.toLocaleString()}</p>
             </div>
           </div>
@@ -220,7 +223,7 @@ function PreviewContent({
             </div>
           )}
 
-          <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm">
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
               <h2 className="text-sm font-semibold text-zinc-900">
                 Preview {parsedRows > 0 ? "· first " + preview.length : ""}
@@ -233,7 +236,7 @@ function PreviewContent({
             ) : (
               <div className="overflow-x-auto" tabIndex={0}>
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500">
+                  <thead className="border-b border-line font-mono text-[11px] text-ink-3">
                     <tr>
                       <th scope="col" className="px-5 py-3 font-medium">Date</th>
                       <th scope="col" className="px-5 py-3 font-medium">Description</th>

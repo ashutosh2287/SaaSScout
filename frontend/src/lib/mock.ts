@@ -8,7 +8,7 @@ export type ReviewItem = {
 export type Tier = "Detected" | "Likely" | "Needs review";
 
 export const heroSpend = {
-  softwareSpend: "$57,840",
+  softwareSpendValue: 57840,
   per: "/ year",
   vendors: "43 vendors",
   itemsToReview: "14 items to review",
@@ -21,9 +21,9 @@ export const heroSpend = {
 };
 
 export const dashboard = {
-  monthly: "$4,820",
-  yearly: "$57,840",
-  vendors: "43 vendors",
+  monthlyValue: 4820,
+  yearlyValue: 57840,
+  vendorsValue: 43,
   itemsToReview: 14,
   reviewQueue: [
     {

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { UploadZone } from "@/components/analyze/UploadZone";
 import { SelectedFile } from "@/components/analyze/SelectedFile";
 import { validateFile, formatFileSize, MAX_FILE_SIZE } from "@/lib/validateFile";
@@ -76,19 +79,10 @@ export default function AnalyzePage() {
   const busy = phase === "parsing";
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="border-b border-line bg-surface">
         <Container className="flex h-16 items-center justify-between">
-          <Link
-            href="/"
-            onClick={() => flight.invalidate()}
-            className="flex items-center gap-2"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
-              S
-            </span>
-            <span className="text-lg font-semibold tracking-tight text-zinc-900">Sasscout</span>
-          </Link>
+          <BrandMark onClick={() => flight.invalidate()} />
           <Link
             href="/"
             onClick={() => flight.invalidate()}
@@ -145,17 +139,9 @@ export default function AnalyzePage() {
                 {phase === "parsing" && (
                   <div
                     role="status"
-                    className="mt-4 flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-600"
+                    className="mt-4 flex items-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-ink-2"
                   >
-                    <svg
-                        aria-hidden="true"
-                        className="h-4 w-4 animate-spin text-emerald-700 motion-reduce:animate-none"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z" />
-                    </svg>
+                    <Spinner size="md" />
                     Reading your transactions…
                   </div>
                 )}
@@ -190,16 +176,11 @@ export default function AnalyzePage() {
         </Container>
       </main>
 
-      <div className="border-t border-zinc-200 bg-white">
+      <div className="border-t border-line bg-surface">
         <Container className="flex items-center justify-end py-6">
-          <button
-            type="button"
-            disabled={phase !== "selected"}
-            onClick={handleContinue}
-            className="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
-          >
+          <Button size="lg" disabled={phase !== "selected"} onClick={handleContinue}>
             {busy ? "Reading…" : "Continue"}
-          </button>
+          </Button>
         </Container>
       </div>
     </div>

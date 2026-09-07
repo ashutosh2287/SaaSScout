@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Container } from "@/components/ui/Container";
+import { BrandMark } from "@/components/layout/BrandMark";
+import { buttonClasses } from "@/components/ui/Button";
 
 const links = [
   { href: "#product", label: "Product" },
@@ -27,21 +29,16 @@ export function Nav() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
-            S
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-zinc-900">Sasscout</span>
-        </Link>
+        <BrandMark onClick={() => setOpen(false)} />
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+              className="text-sm font-medium text-ink-2 transition-colors hover:text-ink"
             >
               {l.label}
             </Link>
@@ -49,10 +46,7 @@ export function Nav() {
         </nav>
 
         <div className="hidden md:flex">
-          <Link
-            href="/analyze"
-            className="inline-flex items-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
-          >
+          <Link href="/analyze" className={buttonClasses("primary", "md")}>
             Analyze my spending
           </Link>
         </div>
@@ -60,7 +54,7 @@ export function Nav() {
         <button
           ref={triggerRef}
           type="button"
-          className="inline-flex items-center justify-center rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 md:hidden"
+          className="inline-flex items-center justify-center rounded-lg p-2 text-ink-2 hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-line-strong md:hidden"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls="mobile-nav"
@@ -84,23 +78,19 @@ export function Nav() {
       </Container>
 
       {open && (
-        <div id="mobile-nav" className="border-t border-zinc-200 bg-white md:hidden">
+        <div id="mobile-nav" className="border-t border-line bg-surface md:hidden">
           <Container className="flex flex-col gap-1 py-4">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-2 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                className="rounded-lg px-2 py-2 text-sm font-medium text-ink-2 hover:bg-surface-muted hover:text-ink"
               >
                 {l.label}
               </Link>
             ))}
-            <Link
-              href="/analyze"
-              onClick={() => setOpen(false)}
-              className="mt-2 inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
-            >
+            <Link href="/analyze" onClick={() => setOpen(false)} className={`${buttonClasses("primary", "md")} mt-2`}>
               Analyze my spending
             </Link>
           </Container>

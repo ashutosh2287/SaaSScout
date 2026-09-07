@@ -36,8 +36,8 @@ export function UploadZone({
         dragging
           ? "border-emerald-500 bg-emerald-50/60"
           : error
-            ? "border-red-300 bg-white"
-            : "border-zinc-300 bg-white hover:border-zinc-400"
+            ? "border-danger bg-surface"
+            : "border-line bg-surface hover:border-line-strong"
       }`}
     >
       <input
@@ -69,7 +69,7 @@ export function UploadZone({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+          className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-ink shadow-card transition-colors hover:bg-brand-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           Choose a file
         </button>

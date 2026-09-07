@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { privacy } from "@/lib/privacy/content";
 
 // Static, presentation-only page. This component holds no state and makes no
@@ -7,18 +8,13 @@ import { privacy } from "@/lib/privacy/content";
 // content model so that the explanation always matches the implementation.
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="min-h-screen bg-canvas">
+      <header className="border-b border-line bg-surface">
         <Container className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
-              S
-            </span>
-            <span className="text-lg font-semibold tracking-tight text-zinc-900">Sasscout</span>
-          </Link>
+          <BrandMark />
           <Link
             href="/analyze"
-            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+            className="text-sm font-medium text-ink-2 transition-colors hover:text-ink"
           >
             Analyze my spending
           </Link>
@@ -47,11 +43,11 @@ export default function PrivacyPage() {
               {privacy.transactionPath.steps.map((s, i) => (
                 <li
                   key={s.title}
-                  className="flex items-start gap-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
+                  className="flex items-start gap-4 rounded-2xl border border-zinc-200 bg-surface p-5 shadow-sm"
                 >
                   <span
                     aria-hidden="true"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-sm font-semibold text-white"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand text-sm font-semibold text-brand-ink"
                   >
                     {i + 1}
                   </span>
@@ -78,7 +74,7 @@ export default function PrivacyPage() {
             <p className="mt-2 leading-7 text-zinc-600">{privacy.backend.intro}</p>
 
             <div className="mt-4">
-              <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-zinc-800">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-surface px-3 py-2 font-mono text-sm text-zinc-800">
                 <span aria-hidden="true" className="h-2 w-2 rounded-full bg-emerald-500" />
                 {privacy.backend.requestBadge}
               </span>

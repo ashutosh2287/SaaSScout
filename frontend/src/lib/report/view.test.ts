@@ -66,6 +66,7 @@ const REVIEW_SUMMARY: ReviewSummary = {
   insufficientEvidenceCount: 0,
   estimatedMonthlyReviewSpend: 45.5,
   estimatedYearlyReviewSpend: 546,
+  unclearOwnershipCount: 0,
 };
 
 describe("savedRecurringCounts", () => {

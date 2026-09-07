@@ -19,7 +19,7 @@ export function MerchantSummaryCard({
   const top = merchants.slice(0, TOP_MERCHANTS);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Merchants identified</h2>
         <span className="text-sm text-zinc-500">

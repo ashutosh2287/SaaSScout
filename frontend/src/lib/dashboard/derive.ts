@@ -155,6 +155,8 @@ function matchFilter(status: ReviewStatus, filter: ReviewQueueFilter): boolean {
   switch (filter) {
     case "all":
       return true;
+    case "actionable":
+      return status === "strong_review" || status === "review";
     case "strong_review":
       return status === "strong_review";
     case "review":
@@ -162,6 +164,34 @@ function matchFilter(status: ReviewStatus, filter: ReviewQueueFilter): boolean {
     case "insufficient_evidence":
       return status === "insufficient_evidence";
   }
+}
+
+// Step 23 — dynamic queue counts for the filter control. Pure; derived only
+// from the existing reviewStatus field, never from a new classification rule.
+export type ReviewQueueCounts = {
+  all: number;
+  actionable: number;
+  strong_review: number;
+  review: number;
+  insufficient_evidence: number;
+};
+
+export function countReviewQueue(reviews: ReviewQueueItem[]): ReviewQueueCounts {
+  let strong_review = 0;
+  let review = 0;
+  let insufficient_evidence = 0;
+  for (const r of reviews) {
+    if (r.reviewStatus === "strong_review") strong_review++;
+    else if (r.reviewStatus === "review") review++;
+    else if (r.reviewStatus === "insufficient_evidence") insufficient_evidence++;
+  }
+  return {
+    all: reviews.length,
+    actionable: strong_review + review,
+    strong_review,
+    review,
+    insufficient_evidence,
+  };
 }
 
 function compareReviews(a: ReviewQueueItem, b: ReviewQueueItem, sort: ReviewQueueSort): number {

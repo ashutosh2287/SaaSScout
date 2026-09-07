@@ -15,27 +15,37 @@ enterprise SaaS-management platform.
 
 ## Current Status
 
-**Step 27 — Frontend backend health integration & service boundary.** The
-analysis pipeline (parse → quality → merchant → classification → recurring →
-software → review/leak → dashboard → report → local persistence) is fully
-implemented and runs **local-first** in the frontend; transaction data never
-leaves the browser. The backend is a minimal, secure Hono API foundation
-exposing a single `GET /health` endpoint with explicit dev-safe CORS, a uniform
-JSON error envelope, and no sensitive leakage. The frontend exposes a typed
-`src/lib/api` boundary that only calls `/health`. STEP 27 adds a single
-service-status abstraction (`src/lib/api/health.ts`) and a presentation-only
-`ServiceStatusBar` mounted in the root layout that reports
-available / unavailable / not-configured / checking with one bounded health
-check per page. The status bar never affects upload, parsing, analysis,
-export, save, or saved reports — the product stays fully usable when the
-backend is down or unconfigured.
+**Functional core complete and local-first.** The analysis pipeline (parse →
+quality → merchant → classification → recurring → software → review → dashboard
+→ report → compare → local persistence → export) is fully implemented and runs
+entirely in the browser; transaction data never leaves the device. The backend
+is a minimal Hono API exposing only `GET /health` with a dev-safe CORS
+allow-list and a uniform JSON error envelope.
 
-Not yet implemented (deferred to future steps): authentication, database,
-cloud storage, AI/LLM analysis, payments/subscriptions, analytics, telemetry,
-and the deeper spend findings advertised on the landing page (overlapping
-tools, vendors without owners, vendors across multiple payment sources, and
-dedicated "new recurring charge" detection). The backend intentionally has no
-such functionality yet.
+**Recent work (uncommitted on `main`, labelled Steps 22–25):** comparison
+findings are prioritised by impact with a neutral next-step line, the review
+queue gained a dynamic "Actionable" preset with live chip counts, and the
+compare surface gained a compact aggregate summary band (net annualized change
++ kind counts, with currency/order-stability guardrails). Reports for these
+steps live in `docs/`.
+
+**Previously hardened:** performance to 25k rows (sub-second parse → analyze →
+preview), IndexedDB persistence + lifecycle resilience, a11y regression,
+privacy / network-boundary proofs, CI/deploy/reverse-proxy validation, and
+trust language across the UI.
+
+**Current track — production UI & launch (STEP 0–8):** premium design system,
+animation layer, landing-page transformation, data visualisation, the remaining
+product findings (overlapping tools, unowned vendors, cross-source deduction),
+polished loading/empty/error states, browser QA + accessibility + security,
+then deployment with sample-data onboarding and truthful docs. Auth, database,
+cloud storage, AI/LLM analysis, payments, and telemetry remain deliberate
+non-goals until the post-launch loop justifies them.
+
+> **Git note:** commits were re-labelled during development; the current tip is
+> labelled "Step 21" and sits above commits labelled "Step 31–37". The working
+> tree carries Steps 22–25 uncommitted. Gate truth: frontend 823 tests (42
+> files), backend 46 tests — all green on lint/tsc/build.
 
 ## Project Structure
 

@@ -5,7 +5,9 @@ import { listAnalyses, PersistenceError, schemaCompatible } from "@/lib/persiste
 import type { SavedAnalysis } from "@/lib/persistence/types";
 import { compareReports } from "@/lib/compare/engine";
 import type { ComparisonResult } from "@/lib/compare/types";
-import { KIND_LABEL, confidenceLabel, impactLine, windowText } from "@/lib/compare/format";
+import { KIND_LABEL, confidenceLabel, impactLine, suggestedAction, windowText } from "@/lib/compare/format";
+import { prioritizeFindings } from "@/lib/compare/prioritize";
+import { formatSummary, summarizeFindings } from "@/lib/compare/summary";
 
 type PanelState =
   | { kind: "loading" }
@@ -55,7 +57,7 @@ export function ComparePanel() {
     state.kind === "ready" ? state.items.filter((i) => schemaCompatible(i)) : [];
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
       {state.kind === "loading" && (
         <p role="status" className="text-sm text-zinc-500">
           Loading saved analyses…
@@ -92,7 +94,7 @@ export function ComparePanel() {
                   setBaselineId(e.target.value);
                   setResult(null);
                 }}
-                className="mt-1.5 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+                className="mt-1.5 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               >
                 <option value="">Select an analysis…</option>
                 {selectable.map((i) => (
@@ -110,7 +112,7 @@ export function ComparePanel() {
                   setCurrentId(e.target.value);
                   setResult(null);
                 }}
-                className="mt-1.5 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
+                className="mt-1.5 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
               >
                 <option value="">Select an analysis…</option>
                 {selectable.map((i) => (
@@ -124,7 +126,7 @@ export function ComparePanel() {
               type="button"
               disabled={!baseline || !current || baseline.id === current.id}
               onClick={runCompare}
-              className="rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-ink transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               Compare
             </button>
@@ -135,7 +137,17 @@ export function ComparePanel() {
             file and save again before comparing.
           </p>
 
-          {result && <ResultView result={result} currency={current?.report.currency ?? null} />}
+          {result && (
+            <ResultView
+              result={result}
+              currency={current?.report.currency ?? null}
+              currencyMismatch={
+                baseline?.report.currency != null &&
+                current?.report.currency != null &&
+                baseline.report.currency !== current.report.currency
+              }
+            />
+          )}
         </div>
       )}
     </div>
@@ -147,7 +159,15 @@ function labelOf(saved: SavedAnalysis): string {
   return `${saved.name} (${windowText(w)})`;
 }
 
-function ResultView({ result, currency }: { result: ComparisonResult; currency?: string | null }) {
+function ResultView({
+  result,
+  currency,
+  currencyMismatch,
+}: {
+  result: ComparisonResult;
+  currency?: string | null;
+  currencyMismatch?: boolean;
+}) {
   return (
     <div className="mt-8">
       {result.caution && (
@@ -158,12 +178,12 @@ function ResultView({ result, currency }: { result: ComparisonResult; currency?:
 
       <div className="mb-6 grid gap-3 text-sm sm:grid-cols-2">
         <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Earlier period</p>
+          <p className="font-mono text-[11px] text-ink-3">earlier period</p>
           <p className="mt-1 text-zinc-700">{result.baseline.label}</p>
           <p className="text-xs text-zinc-500">{windowText(result.baseline.window)}</p>
         </div>
         <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Current period</p>
+          <p className="font-mono text-[11px] text-ink-3">current period</p>
           <p className="mt-1 text-zinc-700">{result.current.label}</p>
           <p className="text-xs text-zinc-500">{windowText(result.current.window)}</p>
         </div>
@@ -180,19 +200,39 @@ function ResultView({ result, currency }: { result: ComparisonResult; currency?:
       )}
 
       {result.findings.length > 0 && (
+        <section
+          aria-label="Comparison summary"
+          className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm text-emerald-900"
+        >
+          <p>{formatSummary(summarizeFindings(result.findings), { currency, currencyMismatch, ordered: result.ordered })}</p>
+        </section>
+      )}
+
+      {result.findings.length > 0 && (
         <ul className="space-y-4">
-          {result.findings.map((f) => (
-            <li key={`${f.kind}:${f.merchantKey}`} className="rounded-xl border border-zinc-200 px-4 py-4">
+          {prioritizeFindings(result.findings).map((f) => {
+            const key = f.kind === "possible_overlap" && f.pair
+              ? `${f.kind}:${f.merchantKey}:${f.pair.merchantKey}`
+              : `${f.kind}:${f.merchantKey}`;
+            return (
+            <li key={key} className="rounded-xl border border-zinc-200 px-4 py-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-semibold text-zinc-900">
                   {KIND_LABEL[f.kind]}
-                  <span className="ml-2 font-normal text-zinc-500">— {f.merchantName}</span>
+                  {f.kind === "possible_overlap" && f.pair ? (
+                    <span className="ml-2 font-normal text-zinc-500">
+                      — {f.merchantName} and {f.pair.merchantName}
+                    </span>
+                  ) : (
+                    <span className="ml-2 font-normal text-zinc-500">— {f.merchantName}</span>
+                  )}
                 </p>
                 <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
                   {confidenceLabel(f.confidence)}
                 </span>
               </div>
               {impactLine(f, currency) && <p className="mt-2 text-sm font-medium text-zinc-700">{impactLine(f, currency)}</p>}
+              {suggestedAction(f) && <p className="mt-1 text-sm text-zinc-600">Next step: {suggestedAction(f)}</p>}
               <ul className="mt-3 space-y-1.5">
                 {f.evidence.map((e, i) => (
                   <li key={i} className="flex gap-2 text-sm text-zinc-600">
@@ -202,7 +242,8 @@ function ResultView({ result, currency }: { result: ComparisonResult; currency?:
                 ))}
               </ul>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 

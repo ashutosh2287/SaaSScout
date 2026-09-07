@@ -176,6 +176,7 @@ function makeInput(overrides?: {
             insufficientEvidenceCount: 1,
             estimatedMonthlyReviewSpend: 0,
             estimatedYearlyReviewSpend: 0,
+            unclearOwnershipCount: 0,
           }
         : {
             strongReviewCount: 1,
@@ -184,6 +185,7 @@ function makeInput(overrides?: {
             insufficientEvidenceCount: 0,
             estimatedMonthlyReviewSpend: 1499,
             estimatedYearlyReviewSpend: 17988,
+            unclearOwnershipCount: 0,
           },
       dataQuality: overrides?.q?.analysisReadiness ?? "ready",
     },

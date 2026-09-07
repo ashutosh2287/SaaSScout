@@ -12,6 +12,7 @@ import {
   REFUND_MARKER_TOKENS,
   WEEKLY_INTERVAL_MAX_CONFIDENCE,
 } from "./constants";
+import { detectIntraPeriodOverlaps } from "./overlap";
 import type {
   ComparisonConfidence,
   ComparisonEvidence,
@@ -573,6 +574,16 @@ export function compareReports(
     }
   }
 
+  // Step 26 — intra-period overlap (current report only). Two distinct
+  // recurring software merchants in the same subcategory is a single
+  // `possible_overlap` finding per pair; it is added to the per-merchant
+  // findings above so the surface shows it alongside the cross-period
+  // changes without a second visual section. The function is pure, takes
+  // only the current report, and emits no cross-period hypothesis.
+  for (const ov of detectIntraPeriodOverlaps(current)) {
+    findings.push(ov);
+  }
+
   // Window-order honesty check: if both windows are known but the baseline is
   // labeled "earlier" while it actually starts later, the direction of every
   // finding is reversed from what the labels claim. This, not a currency
@@ -606,6 +617,7 @@ export function compareReports(
     pattern_irregular: 5,
     merchant_appeared: 6,
     merchant_disappeared: 7,
+    possible_overlap: 8,
   };
   findings.sort((x, y) =>
     kindOrder[x.kind] - kindOrder[y.kind] || x.merchantName.localeCompare(y.merchantName),

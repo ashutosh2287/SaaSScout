@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
+import { BrandMark } from "@/components/layout/BrandMark";
 import { deleteAnalysis, listAnalyses, PersistenceError } from "@/lib/persistence";
 import { schemaCompatible } from "@/lib/persistence";
 import type { SavedAnalysis } from "@/lib/persistence/types";
@@ -59,14 +60,11 @@ export default function SavedAnalysesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="min-h-screen bg-canvas">
+      <header className="border-b border-line bg-surface">
         <Container className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">S</span>
-            <span className="text-lg font-semibold tracking-tight text-zinc-900">Sasscout</span>
-          </Link>
-          <Link href="/analyze" className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900">
+          <BrandMark />
+          <Link href="/analyze" className="text-sm font-medium text-ink-2 transition-colors hover:text-ink">
             Analyze a file
           </Link>
         </Container>
@@ -91,7 +89,7 @@ export default function SavedAnalysesPage() {
             {state.kind === "loading" && (
               <div
                 role="status"
-                className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-500 shadow-sm"
+                className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center text-sm text-zinc-500 shadow-sm"
               >
                 Loading saved analyses…
               </div>
@@ -100,21 +98,21 @@ export default function SavedAnalysesPage() {
             {state.kind === "error" && (
               <div
                 role="status"
-                className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center text-sm text-zinc-600 shadow-sm"
+                className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center text-sm text-zinc-600 shadow-sm"
               >
                 {state.message}
               </div>
             )}
 
             {state.kind === "loaded" && state.items.length === 0 && (
-              <div className="rounded-2xl border border-zinc-200 bg-white px-5 py-12 text-center shadow-sm">
+              <div className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center shadow-sm">
                 <p className="text-sm font-medium text-zinc-700">No saved analyses yet.</p>
                 <p className="mt-2 text-sm text-zinc-500">
                   Analyze your spending and save a report to see it here.
                 </p>
                 <Link
                   href="/analyze"
-                  className="mt-5 inline-flex items-center justify-center rounded-lg bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+                  className="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-ink shadow-card transition-colors hover:bg-brand-hover"
                 >
                   Analyze a file
                 </Link>
@@ -122,7 +120,7 @@ export default function SavedAnalysesPage() {
             )}
 
             {state.kind === "loaded" && state.items.length > 0 && (
-              <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+              <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm">
                 {state.items.map((item) => {
                   const compatible = schemaCompatible(item);
                   return (
@@ -153,7 +151,7 @@ export default function SavedAnalysesPage() {
                             <button
                               type="button"
                               onClick={() => handleDelete(item.id)}
-                              className="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+                              className="rounded-lg bg-danger px-2.5 py-1.5 text-xs font-semibold text-brand-ink hover:opacity-90"
                             >
                               Yes
                             </button>

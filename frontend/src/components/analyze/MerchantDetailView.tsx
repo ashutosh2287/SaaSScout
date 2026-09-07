@@ -18,7 +18,7 @@ export function useMerchantDetail(report: SasscoutReport | null) {
   const panel = detail ? (
     <section
       id={uniquePanelId("merchant-detail", detail.merchantKey)}
-      className="rounded-lg border border-zinc-200 bg-white px-4 py-3"
+      className="rounded-lg border border-zinc-200 bg-surface px-4 py-3"
       aria-label={`${detail.merchantName} details`}
     >
       <p className="flex flex-wrap items-center justify-between gap-2">

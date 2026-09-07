@@ -528,4 +528,138 @@ describe("Step 10 subscription leak / spend review detection", () => {
       expect(keys).toEqual(["a", "b", "c"]);
     });
   });
+
+  describe("Step 27 — unclear ownership (recurring software that the classification could not identify)", () => {
+    it("fires on a software merchant with an unknown classification that reaches review", () => {
+      const res = detect([
+        merchant("mystery-svc", {
+          // status "software" — the aggregate layer accepts it as a software
+          // candidate (not in any non-software list) — but the classification
+          // engine could not identify it.
+          status: "software",
+          category: "unknown",
+          categoryConfidence: "low",
+          recurring: recurring("likely_recurring", "monthly", {
+            stable: true, transactions: 8, typical: 49,
+            first: "2026-01-05", last: "2026-08-05",
+          }),
+          transactionCount: 8,
+          monthly: 49, yearly: 49 * 12,
+        }),
+      ]);
+      const r = byKey(res.reviews, "mystery-svc");
+      expect(r?.status === "review" || r?.status === "strong_review").toBe(true);
+      expect(hasReason(r!, "unclear_ownership")).toBe(true);
+      expect(res.summary.unclearOwnershipCount).toBe(1);
+    });
+
+    it("does NOT fire when classification is known (likely_saas / likely_software / not_software)", () => {
+      const res = detect([
+        merchant("adobe", {
+          status: "software",
+          category: "likely_software",
+          recurring: recurring("likely_recurring", "monthly", {
+            stable: true, transactions: 12, typical: 50, first: "2026-01-05", last: "2026-12-05",
+          }),
+          transactionCount: 12, monthly: 50, yearly: 50 * 12,
+        }),
+        merchant("electric", {
+          status: "non_software",
+          category: "not_software",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 12 }),
+          transactionCount: 12,
+        }),
+      ]);
+      expect(res.summary.unclearOwnershipCount).toBe(0);
+      for (const r of res.reviews) {
+        expect(hasReason(r, "unclear_ownership")).toBe(false);
+      }
+    });
+
+    it("does NOT fire when status is review/strong_review-capable but the merchant never reaches a review status", () => {
+      // A software merchant with only 1 payment lands in
+      // insufficient_evidence; the gate is explicit and the reason does
+      // not fire on a status that is not a review.
+      const res = detect([
+        merchant("mystery", {
+          status: "software",
+          category: "unknown",
+          categoryConfidence: "low",
+          recurring: recurring("insufficient_data", null, { transactions: 1 }),
+          transactionCount: 1, monthly: 30, yearly: 360,
+        }),
+      ]);
+      const r = byKey(res.reviews, "mystery");
+      expect(r?.status).toBe("insufficient_evidence");
+      expect(hasReason(r!, "unclear_ownership")).toBe(false);
+      expect(res.summary.unclearOwnershipCount).toBe(0);
+    });
+
+    it("does NOT fire when the merchant status is 'uncertain' (already excluded upstream)", () => {
+      // m.status === "uncertain" means the aggregate layer already flagged
+      // it (e.g. payment processor / mixed). The upstream gate prevents
+      // review status, so unclear_ownership cannot fire.
+      const res = detect([
+        merchant("mystery", {
+          status: "uncertain",
+          category: "unknown",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 12 }),
+          transactionCount: 12,
+        }),
+      ]);
+      const r = byKey(res.reviews, "mystery");
+      expect(r?.status).toBe("insufficient_evidence");
+      expect(hasReason(r!, "unclear_ownership")).toBe(false);
+      expect(res.summary.unclearOwnershipCount).toBe(0);
+    });
+
+    it("counts each unclear-ownership merchant once (dedup)", () => {
+      const res = detect([
+        merchant("mystery-a", {
+          status: "software",
+          category: "unknown",
+          categoryConfidence: "low",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 12, typical: 50, first: "2026-01-05", last: "2026-12-05" }),
+          transactionCount: 12, monthly: 50, yearly: 600,
+        }),
+        merchant("mystery-b", {
+          status: "software",
+          category: "unknown",
+          categoryConfidence: "low",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 8, typical: 30, first: "2026-01-05", last: "2026-08-05" }),
+          transactionCount: 8, monthly: 30, yearly: 360,
+        }),
+        merchant("adobe", {
+          status: "software",
+          category: "likely_software",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 12, typical: 50, first: "2026-01-05", last: "2026-12-05" }),
+          transactionCount: 12, monthly: 50, yearly: 600,
+        }),
+      ]);
+      expect(res.summary.unclearOwnershipCount).toBe(2);
+      // strong_review and review counts are independent — adobe still
+      // counts even though the reason did not fire on it.
+      expect(res.summary.strongReviewCount + res.summary.reviewCount).toBeGreaterThanOrEqual(3);
+    });
+
+    it("the reason text is plain English and does not invent a category or claim savings", () => {
+      const res = detect([
+        merchant("mystery", {
+          status: "software",
+          category: "unknown",
+          categoryConfidence: "low",
+          recurring: recurring("likely_recurring", "monthly", { transactions: 12, typical: 50 }),
+          transactionCount: 12, monthly: 50, yearly: 600,
+        }),
+      ]);
+      const r = byKey(res.reviews, "mystery")!;
+      const text = r.reasons.find((x) => x.type === "unclear_ownership")?.message ?? "";
+      expect(text.length).toBeGreaterThan(10);
+      // Honest copy: no savings / cancel / waste language.
+      expect(text.toLowerCase()).not.toContain("saving");
+      expect(text.toLowerCase()).not.toContain("cancel");
+      expect(text.toLowerCase()).not.toContain("waste");
+      expect(text.toLowerCase()).not.toContain("unused");
+    });
+  });
 });

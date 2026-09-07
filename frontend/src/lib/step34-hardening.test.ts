@@ -510,6 +510,7 @@ describe("STEP 34 — export integrity", () => {
       review: {
         strongReviewCount: 0, reviewCount: 0, noConcernCount: 0, insufficientEvidenceCount: merchants.length,
         estimatedMonthlyReviewSpend: 0, estimatedYearlyReviewSpend: 0,
+        unclearOwnershipCount: 0,
       },
       currency: null,
       merchants,

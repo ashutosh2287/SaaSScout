@@ -14,7 +14,7 @@ const readinessLabel: Record<string, string> = {
 
 export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Data quality</h2>
         <div className="flex items-center gap-3">
@@ -29,15 +29,15 @@ export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
 
       <div className="px-5 py-4">
         <ul className="space-y-2 text-sm">
-          <QualityRow label="Dates" value={`${q.date.present.toLocaleString()} present · ${q.date.missing.toLocaleString()} missing`} ok={q.date.missing === 0 || q.date.present >= (q.date.present + q.date.missing) * 0.9} />
+          <QualityRow label="dates" value={`${q.date.present.toLocaleString()} present · ${q.date.missing.toLocaleString()} missing`} ok={q.date.missing === 0 || q.date.present >= (q.date.present + q.date.missing) * 0.9} />
           <QualityRow
-            label="Analyzed window"
+            label="analyzed window"
             value={q.date.earliest && q.date.latest ? `${q.date.earliest} to ${q.date.latest}` : "No usable dates"}
             ok={Boolean(q.date.earliest && q.date.latest)}
           />
-          <QualityRow label="Descriptions" value={`${q.description.missing.toLocaleString()} missing · ${q.description.lowInformation.toLocaleString()} low-information`} ok={q.description.missing === 0} />
-          <QualityRow label="Amounts" value={`${q.amount.positive.toLocaleString()} positive · ${q.amount.negative.toLocaleString()} negative · ${q.amount.zero.toLocaleString()} zero`} ok={true} />
-          <QualityRow label="Coverage" value={`${q.coverage.dateRangeDays?.toLocaleString() ?? "—"} days${q.coverage.dateRangeDays ? ` · ${q.coverage.monthsRepresented} months` : ""}`} ok={Boolean(q.coverage.dateRangeDays)} />
+          <QualityRow label="descriptions" value={`${q.description.missing.toLocaleString()} missing · ${q.description.lowInformation.toLocaleString()} low-information`} ok={q.description.missing === 0} />
+          <QualityRow label="amounts" value={`${q.amount.positive.toLocaleString()} positive · ${q.amount.negative.toLocaleString()} negative · ${q.amount.zero.toLocaleString()} zero`} ok={true} />
+          <QualityRow label="coverage" value={`${q.coverage.dateRangeDays?.toLocaleString() ?? "—"} days${q.coverage.dateRangeDays ? ` · ${q.coverage.monthsRepresented} months` : ""}`} ok={Boolean(q.coverage.dateRangeDays)} />
         </ul>
 
         <div className="mt-4 flex items-center justify-between rounded-lg bg-zinc-50 px-4 py-3">
@@ -47,7 +47,7 @@ export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
 
         {q.warnings.length > 0 && (
           <div className="mt-4 border-t border-zinc-100 pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <p className="font-mono text-[11px] text-ink-3">
               {q.warnings.length} check{q.warnings.length === 1 ? "" : "s"}
             </p>
             <ul className="mt-2 space-y-1.5">
@@ -75,13 +75,13 @@ export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
 function QualityRow({ label, value, ok }: { label: string; value: string; ok: boolean }) {
   return (
     <li className="flex items-center justify-between gap-4">
-      <span className="flex items-center gap-2 text-zinc-700">
+      <span className="flex items-center gap-2 font-mono text-[11px] text-ink-3 lowercase">
         <span aria-hidden="true" className={`text-xs ${ok ? "text-emerald-700" : "text-amber-700"}`}>
           {ok ? "✓" : "⚠"}
         </span>
         {label}
       </span>
-      <span className="text-right text-zinc-500">{value}</span>
+      <span className="text-right text-xs text-zinc-500">{value}</span>
     </li>
   );
 }

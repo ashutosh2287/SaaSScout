@@ -64,7 +64,8 @@ export type ComparisonKind =
   | "frequency_change"
   | "pattern_irregular"
   | "merchant_appeared"
-  | "merchant_disappeared";
+  | "merchant_disappeared"
+  | "possible_overlap";
 
 export type ComparisonConfidence = "high" | "medium" | "low";
 
@@ -90,7 +91,12 @@ export type ComparisonEvidenceType =
   | "irregular_pattern"
   | "not_ended"
   | "pattern_baseline_weak"
-  | "identity_uncertain";
+  | "identity_uncertain"
+  // Step 26 — intra-period overlap (two merchants in the same report share a
+  // subcategory and are both recurring).
+  | "shared_subcategory"
+  | "both_recurring_current"
+  | "overlap_not_duplication";
 
 export type ComparisonEvidence = {
   type: ComparisonEvidenceType;
@@ -110,6 +116,11 @@ export type ComparisonFinding = {
   confidence: ComparisonConfidence;
   evidence: ComparisonEvidence[];
   impact: ComparisonImpact;
+  // Step 26 — set ONLY for `possible_overlap`. Names the SECOND merchant in
+  // the pair. `merchantKey` / `merchantName` continue to identify the first
+  // merchant so existing engine contract is unchanged. impact is always
+  // null/null for overlap (no spend delta is implied by sharing a category).
+  pair?: { merchantKey: string; merchantName: string; subcategory: string };
 };
 
 // A hypothesis the engine considered and deliberately DID NOT turn into a

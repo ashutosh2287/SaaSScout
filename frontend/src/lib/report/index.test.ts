@@ -70,7 +70,7 @@ function software(merchants?: SoftwareSpendResult["merchants"]): SoftwareSpendRe
 function review(overrides?: Partial<SpendReviewResult>): SpendReviewResult {
   return {
     reviews: [],
-    summary: { strongReviewCount: 0, reviewCount: 0, noConcernCount: 0, insufficientEvidenceCount: 0, estimatedMonthlyReviewSpend: 0, estimatedYearlyReviewSpend: 0 },
+    summary: { strongReviewCount: 0, reviewCount: 0, noConcernCount: 0, insufficientEvidenceCount: 0, estimatedMonthlyReviewSpend: 0, estimatedYearlyReviewSpend: 0, unclearOwnershipCount: 0 },
     dataQuality: "ready",
     ...(overrides ?? {}),
   };

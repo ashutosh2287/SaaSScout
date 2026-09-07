@@ -6,29 +6,29 @@ export function SoftwareSpendCard({ result, currency }: { result: SoftwareSpendR
 
   const stat = [
     {
-      label: "Total software spend",
+      label: "total software spend",
       value: formatMoney(s.totalSoftwareSpend, currency),
       cls: "text-zinc-900",
     },
     {
-      label: "Est. monthly recurring",
+      label: "est. monthly recurring",
       value: formatMoney(s.estimatedMonthlySpend, currency),
       cls: "text-emerald-700",
     },
     {
-      label: "Est. yearly recurring",
+      label: "est. yearly recurring",
       value: formatMoney(s.estimatedYearlySpend, currency),
       cls: "text-emerald-700",
     },
     {
-      label: "Software merchants",
+      label: "software merchants",
       value: s.softwareMerchantCount.toLocaleString(),
       cls: "text-zinc-900",
     },
   ];
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
       <div className="border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Software spend</h2>
         <p className="mt-0.5 text-xs text-zinc-500">
@@ -40,7 +40,7 @@ export function SoftwareSpendCard({ result, currency }: { result: SoftwareSpendR
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stat.map((r) => (
             <div key={r.label} className="rounded-lg bg-zinc-50 px-4 py-3">
-              <dt className="text-xs text-zinc-500">{r.label}</dt>
+              <dt className="font-mono text-[11px] text-ink-3 lowercase">{r.label}</dt>
               <dd className={`mt-1 text-xl font-semibold tabular-nums ${r.cls}`}>{r.value}</dd>
             </div>
           ))}
@@ -48,7 +48,7 @@ export function SoftwareSpendCard({ result, currency }: { result: SoftwareSpendR
 
         <div className="mt-4 overflow-x-auto" tabIndex={0}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500">
+            <thead className="border-b border-line font-mono text-[11px] text-ink-3">
               <tr>
                 <th scope="col" className="rounded-l-lg px-4 py-2.5 font-medium">Merchant</th>
                 <th scope="col" className="px-4 py-2.5 text-right font-medium">Total spend</th>

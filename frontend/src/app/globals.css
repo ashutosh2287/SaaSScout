@@ -1,26 +1,293 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* =========================================================================
+   SaaSScout design tokens (STEP 1 - premium design foundation).
+   Two layers:
+     1. Raw Tailwind color families (zinc/emerald/amber/red/teal/blue) are
+        remapped through CSS variables so EXISTING utility usage (bg-zinc-50,
+        text-emerald-700, border-zinc-200, ...) dark-adapts automatically.
+        Light values are the exact Tailwind v4 defaults.
+     2. Semantic tokens (canvas/surface/ink/line/brand/warn/danger) for new
+        primitives and page shells.
+   Dark scheme activates via prefers-color-scheme (a class-based toggle is a
+   later one-line addition, see docs/STEP-1-report.md).
+   ========================================================================= */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  /* ---- zinc family (theme-adaptive) ---- */
+  --zinc-50:  oklch(0.985 0 0);
+  --zinc-100: oklch(0.967 0.001 286.375);
+  --zinc-200: oklch(0.92 0.004 286.32);
+  --zinc-300: oklch(0.871 0.006 286.286);
+  --zinc-400: oklch(0.705 0.015 286.067);
+  --zinc-500: oklch(0.552 0.016 285.938);
+  --zinc-600: oklch(0.442 0.017 285.786);
+  --zinc-700: oklch(0.37 0.013 285.805);
+  --zinc-800: oklch(0.274 0.006 286.033);
+  --zinc-900: oklch(0.21 0.006 285.885);
+  --zinc-950: oklch(0.141 0.005 285.823);
+
+  /* ---- emerald family (theme-adaptive) ---- */
+  --emerald-50:  oklch(0.979 0.021 166.113);
+  --emerald-100: oklch(0.95 0.052 163.051);
+  --emerald-200: oklch(0.905 0.093 164.15);
+  --emerald-300: oklch(0.845 0.143 164.978);
+  --emerald-400: oklch(0.765 0.177 163.223);
+  --emerald-500: oklch(0.696 0.17 162.48);
+  --emerald-600: oklch(0.596 0.145 163.225);
+  --emerald-700: oklch(0.508 0.118 165.612);
+  --emerald-800: oklch(0.432 0.095 166.913);
+  --emerald-900: oklch(0.378 0.077 168.94);
+  --emerald-950: oklch(0.262 0.051 172.552);
+
+  /* ---- amber family (theme-adaptive) ---- */
+  --amber-50:  oklch(0.987 0.022 95.277);
+  --amber-100: oklch(0.962 0.059 95.617);
+  --amber-200: oklch(0.901 0.121 95.746);
+  --amber-300: oklch(0.828 0.189 84.429);
+  --amber-400: oklch(0.769 0.188 70.08);
+  --amber-500: oklch(0.666 0.179 58.318);
+  --amber-600: oklch(0.555 0.163 48.998);
+  --amber-700: oklch(0.473 0.137 46.201);
+  --amber-800: oklch(0.414 0.112 45.904);
+  --amber-900: oklch(0.279 0.077 45.635);
+  --amber-950: oklch(0.279 0.077 45.635);
+
+  /* ---- red family (theme-adaptive) ---- */
+  --red-50:  oklch(0.971 0.013 17.38);
+  --red-100: oklch(0.936 0.032 17.717);
+  --red-200: oklch(0.885 0.062 18.334);
+  --red-300: oklch(0.808 0.114 19.571);
+  --red-400: oklch(0.704 0.191 22.216);
+  --red-500: oklch(0.637 0.237 25.331);
+  --red-600: oklch(0.577 0.245 27.325);
+  --red-700: oklch(0.505 0.213 27.518);
+  --red-800: oklch(0.444 0.177 26.899);
+  --red-900: oklch(0.396 0.141 25.723);
+  --red-950: oklch(0.258 0.092 26.042);
+
+  /* ---- teal / blue (classification chips) ---- */
+  --teal-600: oklch(0.6 0.118 184.704);
+  --teal-700: oklch(0.511 0.096 186.391);
+  --blue-600: oklch(0.546 0.245 262.881);
+  --blue-700: oklch(0.488 0.243 264.376);
+
+  /* ---- semantic ---- */
+  --canvas: oklch(0.985 0 0); /* zinc-50; app page background */
+  --surface: #ffffff;
+  --surface-muted: oklch(0.967 0.001 286.375);
+  --line: oklch(0.92 0.004 286.32);
+  --line-strong: oklch(0.871 0.006 286.286);
+  --ink: oklch(0.21 0.006 285.885);
+  --ink-2: oklch(0.442 0.017 285.786);
+  --ink-3: oklch(0.552 0.016 285.938);
+  --brand: oklch(0.596 0.145 163.225);
+  --brand-hover: oklch(0.508 0.118 165.612);
+  --brand-ink: #ffffff;
+  --brand-soft: oklch(0.95 0.052 163.051);
+  --brand-line: oklch(0.905 0.093 164.15);
+  --warn: oklch(0.555 0.163 48.998);
+  --warn-soft: oklch(0.987 0.022 95.277);
+  --danger: oklch(0.577 0.245 27.325);
+  --danger-soft: oklch(0.971 0.013 17.38);
+
+  /* ---- elevation ---- */
+  --shadow-card: 0 1px 2px rgb(9 9 11 / 0.04), 0 1px 3px rgb(9 9 11 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(9 9 11 / 0.05), 0 6px 16px rgb(9 9 11 / 0.1);
+  --shadow-pop: 0 4px 8px rgb(9 9 11 / 0.08), 0 12px 32px rgb(9 9 11 / 0.14);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* families flip toward their light counterparts so text/coatings stay readable */
+    --zinc-50:  oklch(0.141 0.005 285.823);
+    --zinc-100: oklch(0.21 0.006 285.885);
+    --zinc-200: oklch(0.274 0.006 286.033);
+    --zinc-300: oklch(0.37 0.013 285.805);
+    --zinc-400: oklch(0.442 0.017 285.786);
+    --zinc-500: oklch(0.552 0.016 285.938);
+    --zinc-600: oklch(0.705 0.015 286.067);
+    --zinc-700: oklch(0.871 0.006 286.286);
+    --zinc-800: oklch(0.92 0.004 286.32);
+    --zinc-900: oklch(0.967 0.001 286.375);
+    --zinc-950: oklch(0.985 0 0);
+
+    --emerald-50:  oklch(0.262 0.051 172.552);
+    --emerald-100: oklch(0.378 0.077 168.94);
+    --emerald-200: oklch(0.432 0.095 166.913);
+    --emerald-300: oklch(0.596 0.145 163.225);
+    --emerald-400: oklch(0.696 0.17 162.48);
+    --emerald-500: oklch(0.765 0.177 163.223);
+    --emerald-600: oklch(0.765 0.177 163.223);
+    --emerald-700: oklch(0.765 0.177 163.223);
+    --emerald-800: oklch(0.696 0.17 162.48);
+    --emerald-900: oklch(0.905 0.093 164.15);
+    --emerald-950: oklch(0.979 0.021 166.113);
+
+    --amber-50:  oklch(0.279 0.077 45.635);
+    --amber-100: oklch(0.414 0.112 45.904);
+    --amber-200: oklch(0.473 0.137 46.201);
+    --amber-300: oklch(0.555 0.163 48.998);
+    --amber-400: oklch(0.666 0.179 58.318);
+    --amber-500: oklch(0.769 0.188 70.08);
+    --amber-600: oklch(0.769 0.188 70.08);
+    --amber-700: oklch(0.828 0.189 84.429);
+    --amber-800: oklch(0.879 0.169 91.605);
+    --amber-900: oklch(0.962 0.059 95.617);
+    --amber-950: oklch(0.987 0.022 95.277);
+
+    --red-50:  oklch(0.258 0.092 26.042);
+    --red-100: oklch(0.396 0.141 25.723);
+    --red-200: oklch(0.444 0.177 26.899);
+    --red-300: oklch(0.505 0.213 27.518);
+    --red-400: oklch(0.637 0.237 25.331);
+    --red-500: oklch(0.704 0.191 22.216);
+    --red-600: oklch(0.704 0.191 22.216);
+    --red-700: oklch(0.704 0.191 22.216);
+    --red-800: oklch(0.808 0.114 19.571);
+    --red-900: oklch(0.885 0.062 18.334);
+
+    --teal-600: oklch(0.704 0.14 182.503);
+    --teal-700: oklch(0.704 0.14 182.503);
+    --blue-600: oklch(0.623 0.214 259.815);
+    --blue-700: oklch(0.623 0.214 259.815);
+
+    --canvas: oklch(0.153 0.005 286);
+    --surface: oklch(0.19 0.006 286);
+    --surface-muted: oklch(0.22 0.006 286);
+    --line: oklch(0.274 0.006 286.033);
+    --line-strong: oklch(0.37 0.013 285.805);
+    --ink: oklch(0.967 0.001 286.375);
+    --ink-2: oklch(0.705 0.015 286.067);
+    --ink-3: oklch(0.552 0.016 285.938);
+    --brand: oklch(0.626 0.17 162.79);
+    --brand-hover: oklch(0.696 0.17 162.48);
+    --brand-ink: oklch(0.158 0.008 285.9);
+    --brand-soft: oklch(0.262 0.051 172.552);
+    --brand-line: oklch(0.378 0.077 168.94);
+    --warn: oklch(0.828 0.189 84.429);
+    --warn-soft: oklch(0.279 0.077 45.635);
+    --danger: oklch(0.704 0.191 22.216);
+    --danger-soft: oklch(0.258 0.092 26.042);
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 3px rgb(0 0 0 / 0.35);
+    --shadow-card-hover: 0 2px 4px rgb(0 0 0 / 0.45), 0 8px 20px rgb(0 0 0 / 0.4);
+    --shadow-pop: 0 4px 8px rgb(0 0 0 / 0.5), 0 16px 40px rgb(0 0 0 / 0.5);
   }
 }
 
+/* Map the raw families + semantic tokens into Tailwind utilities. */
+@theme {
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --color-zinc-50:  var(--zinc-50);
+  --color-zinc-100: var(--zinc-100);
+  --color-zinc-200: var(--zinc-200);
+  --color-zinc-300: var(--zinc-300);
+  --color-zinc-400: var(--zinc-400);
+  --color-zinc-500: var(--zinc-500);
+  --color-zinc-600: var(--zinc-600);
+  --color-zinc-700: var(--zinc-700);
+  --color-zinc-800: var(--zinc-800);
+  --color-zinc-900: var(--zinc-900);
+  --color-zinc-950: var(--zinc-950);
+
+  --color-emerald-50:  var(--emerald-50);
+  --color-emerald-100: var(--emerald-100);
+  --color-emerald-200: var(--emerald-200);
+  --color-emerald-300: var(--emerald-300);
+  --color-emerald-400: var(--emerald-400);
+  --color-emerald-500: var(--emerald-500);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-700: var(--emerald-700);
+  --color-emerald-800: var(--emerald-800);
+  --color-emerald-900: var(--emerald-900);
+  --color-emerald-950: var(--emerald-950);
+
+  --color-amber-50:  var(--amber-50);
+  --color-amber-100: var(--amber-100);
+  --color-amber-200: var(--amber-200);
+  --color-amber-300: var(--amber-300);
+  --color-amber-400: var(--amber-400);
+  --color-amber-500: var(--amber-500);
+  --color-amber-600: var(--amber-600);
+  --color-amber-700: var(--amber-700);
+  --color-amber-800: var(--amber-800);
+  --color-amber-900: var(--amber-900);
+  --color-amber-950: var(--amber-950);
+
+  --color-red-50:  var(--red-50);
+  --color-red-100: var(--red-100);
+  --color-red-200: var(--red-200);
+  --color-red-300: var(--red-300);
+  --color-red-400: var(--red-400);
+  --color-red-500: var(--red-500);
+  --color-red-600: var(--red-600);
+  --color-red-700: var(--red-700);
+  --color-red-800: var(--red-800);
+  --color-red-900: var(--red-900);
+  --color-red-950: var(--red-950);
+
+  --color-teal-600: var(--teal-600);
+  --color-teal-700: var(--teal-700);
+  --color-blue-600: var(--blue-600);
+  --color-blue-700: var(--blue-700);
+
+  /* semantic tokens */
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  /* elevation */
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-pop: var(--shadow-pop);
+
+  /* motion */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================================
+   STEP 2 - reveal-on-scroll. Toggled via [data-inview] set by the Reveal
+   component (useInView). Disabled entirely under prefers-reduced-motion.
+   ========================================================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.65s var(--ease-smooth),
+    transform 0.65s var(--ease-smooth);
+}
+.reveal[data-inview="true"] {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

@@ -26,7 +26,7 @@ export function SelectedFile({
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-xs font-bold text-white"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-xs font-bold text-brand-ink"
         >
           {fileIcon(file.name)}
         </span>
@@ -40,7 +40,7 @@ export function SelectedFile({
       <button
         type="button"
         onClick={onRemove}
-        className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-white hover:text-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+        className="shrink-0 rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition-colors hover:bg-surface hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         Remove
       </button>

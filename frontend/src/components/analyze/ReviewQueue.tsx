@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ReviewQueueFilter, ReviewQueueItem, ReviewQueueSort } from "@/lib/dashboard";
-import { filterAndSortReviews, formatMoney } from "@/lib/dashboard";
+import type { ReviewQueueFilter, ReviewQueueItem, ReviewQueueSort, ReviewQueueCounts } from "@/lib/dashboard";
+import { filterAndSortReviews, formatMoney, countReviewQueue } from "@/lib/dashboard";
 import { categoryLabel, categoryTone } from "./classificationLabels";
 import {
   amountStabilityLabel,
@@ -29,6 +29,7 @@ const REVIEW_STATUS_TONE: Record<ReviewQueueItem["reviewStatus"], string> = {
 
 const FILTERS: { value: ReviewQueueFilter; label: string }[] = [
   { value: "all", label: "All" },
+  { value: "actionable", label: "Actionable" },
   { value: "strong_review", label: "Strong review" },
   { value: "review", label: "Review" },
   { value: "insufficient_evidence", label: "Insufficient evidence" },
@@ -40,6 +41,21 @@ const SORTS: { value: ReviewQueueSort; label: string }[] = [
   { value: "score_desc", label: "Highest review signal" },
   { value: "name_asc", label: "Merchant name" },
 ];
+
+function chipCount(value: ReviewQueueFilter, counts: ReviewQueueCounts): number {
+  switch (value) {
+    case "all":
+      return counts.all;
+    case "actionable":
+      return counts.actionable;
+    case "strong_review":
+      return counts.strong_review;
+    case "review":
+      return counts.review;
+    case "insufficient_evidence":
+      return counts.insufficient_evidence;
+  }
+}
 
 // The primary actionable section. Built entirely from the existing review
 // output (Step 10). Filtering/sorting is presentation-only; nothing is
@@ -64,9 +80,10 @@ export function ReviewQueue({
 
   const visible = useMemo(() => filterAndSortReviews(reviews, filter, sort), [reviews, filter, sort]);
   const showFilter = reviews.length > 1;
+  const counts = useMemo(() => countReviewQueue(reviews), [reviews]);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
       <div className="border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Review queue</h2>
         <p className="mt-0.5 text-xs text-zinc-500">
@@ -97,11 +114,12 @@ export function ReviewQueue({
                       aria-pressed={filter === f.value}
                       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                         filter === f.value
-                          ? "bg-zinc-900 text-white"
+                          ? "bg-ink text-canvas"
                           : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                       }`}
                     >
                       {f.label}
+                      <span className="ml-1 font-normal opacity-70">({chipCount(f.value, counts)})</span>
                     </button>
                   ))}
                 </div>
@@ -111,7 +129,7 @@ export function ReviewQueue({
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as ReviewQueueSort)}
-                  className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700"
+                  className="rounded-lg border border-zinc-200 bg-surface px-2 py-1 text-xs text-zinc-700"
                 >
                   {SORTS.map((f) => (
                     <option key={f.value} value={f.value}>
@@ -280,7 +298,7 @@ function ReviewRow({
               <button
                 type="button"
                 onClick={() => onInspect(item.key)}
-                className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
+                className="rounded-md border border-zinc-200 bg-surface px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
               >
                 {item.reviewStatus === "review" || item.reviewStatus === "strong_review"
                   ? "View investigation"

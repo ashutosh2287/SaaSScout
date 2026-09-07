@@ -5,6 +5,7 @@ import type { RecurringPattern, RecurringStatus, RecurringInterval } from "../re
 import type { SoftwareSpendMerchant, SoftwareSpendSummary } from "../software/types";
 import type { ReportMerchant } from "../report/types";
 import {
+  countReviewQueue,
   deriveDashboard,
   deriveMetrics,
   filterAndSortReviews,
@@ -97,6 +98,7 @@ function summary(overrides: Partial<{
   insufficientEvidenceCount: number;
   estimatedMonthlyReviewSpend: number;
   estimatedYearlyReviewSpend: number;
+  unclearOwnershipCount: number;
   softwareSpend: number;
   monthly: number;
   yearly: number;
@@ -121,6 +123,7 @@ function summary(overrides: Partial<{
       insufficientEvidenceCount: overrides.insufficientEvidenceCount ?? 0,
       estimatedMonthlyReviewSpend: overrides.estimatedMonthlyReviewSpend ?? 0,
       estimatedYearlyReviewSpend: overrides.estimatedYearlyReviewSpend ?? 0,
+      unclearOwnershipCount: overrides.unclearOwnershipCount ?? 0,
     },
   };
 }
@@ -261,6 +264,104 @@ describe("review queue ordering", () => {
   });
 });
 
+// ---------- Step 23: actionable-only preset ----------
+
+describe("review queue actionable preset", () => {
+  const make = (
+    entries: [key: string, status: ReviewQueueItem["reviewStatus"]][],
+  ): ReviewQueueItem[] => entries.map(([key, status]) => ({ ...reviewFromSpendReview(review(key, status)), key, name: key }));
+
+  it("actionable returns only strong_review and review, preserving priority order", () => {
+    const q = make([
+      ["ie1", "insufficient_evidence"],
+      ["rev2", "review"],
+      ["str", "strong_review"],
+      ["rev1", "review"],
+    ]);
+    const out = filterAndSortReviews(q, "actionable", "priority");
+    expect(out.map((r) => r.key)).toEqual(["str", "rev2", "rev1"]);
+  });
+
+  it("all still returns every review row", () => {
+    const q = make([
+      ["a", "strong_review"],
+      ["b", "review"],
+      ["c", "insufficient_evidence"],
+    ]);
+    expect(filterAndSortReviews(q, "all", "priority")).toHaveLength(3);
+  });
+
+  it("counts are derived dynamically from reviewStatus", () => {
+    const q = make([
+      ["a", "strong_review"],
+      ["b", "strong_review"],
+      ["c", "review"],
+      ["d", "insufficient_evidence"],
+      ["e", "insufficient_evidence"],
+      ["f", "insufficient_evidence"],
+    ]);
+    expect(countReviewQueue(q)).toEqual({
+      all: 6,
+      actionable: 3,
+      strong_review: 2,
+      review: 1,
+      insufficient_evidence: 3,
+    });
+  });
+
+  it("handles empty, all-actionable, and all-noise queues", () => {
+    expect(filterAndSortReviews([], "actionable", "priority")).toEqual([]);
+    expect(countReviewQueue([]).actionable).toBe(0);
+
+    const allActionable = make([
+      ["a", "strong_review"],
+      ["b", "review"],
+    ]);
+    expect(filterAndSortReviews(allActionable, "actionable", "priority")).toHaveLength(2);
+    expect(countReviewQueue(allActionable)).toMatchObject({ all: 2, actionable: 2, insufficient_evidence: 0 });
+
+    const allNoise = make([
+      ["a", "insufficient_evidence"],
+      ["b", "insufficient_evidence"],
+    ]);
+    expect(filterAndSortReviews(allNoise, "actionable", "priority")).toHaveLength(0);
+    expect(countReviewQueue(allNoise)).toMatchObject({ all: 2, actionable: 0, insufficient_evidence: 2 });
+  });
+
+  it("single actionable and single noise rows behave", () => {
+    expect(filterAndSortReviews(make([["a", "strong_review"]]), "actionable", "priority").map((r) => r.key)).toEqual(["a"]);
+    expect(filterAndSortReviews(make([["a", "insufficient_evidence"]]), "actionable", "priority")).toHaveLength(0);
+  });
+
+  it("toggling between modes never mutates the source array", () => {
+    const q = make([
+      ["str", "strong_review"],
+      ["rev", "review"],
+      ["ie", "insufficient_evidence"],
+    ]);
+    const snapshot = q.map((r) => r.key);
+    for (let i = 0; i < 5; i++) {
+      filterAndSortReviews(q, "actionable", "priority");
+      filterAndSortReviews(q, "all", "priority");
+      filterAndSortReviews(q, "insufficient_evidence", "priority");
+    }
+    expect(q.map((r) => r.key)).toEqual(snapshot);
+    expect(countReviewQueue(q)).toEqual({ all: 3, actionable: 2, strong_review: 1, review: 1, insufficient_evidence: 1 });
+  });
+
+  it("treats an actionable request without the new preset as unchanged old semantics (regression)", () => {
+    // Old statuses still filter exactly as before; the preset is additive.
+    const q = make([
+      ["str", "strong_review"],
+      ["rev", "review"],
+      ["ie", "insufficient_evidence"],
+    ]);
+    expect(filterAndSortReviews(q, "strong_review", "priority").map((r) => r.key)).toEqual(["str"]);
+    expect(filterAndSortReviews(q, "review", "priority").map((r) => r.key)).toEqual(["rev"]);
+    expect(filterAndSortReviews(q, "insufficient_evidence", "priority").map((r) => r.key)).toEqual(["ie"]);
+  });
+});
+
 describe("deriveDashboard", () => {
   it("merges review status into software rows via live reviews", () => {
     const merchants = [softwareMerchant("Adobe"), softwareMerchant("Slack")];
@@ -362,6 +463,7 @@ describe("report-driven dashboard", () => {
         insufficientEvidenceCount: 0,
         estimatedMonthlyReviewSpend: 40,
         estimatedYearlyReviewSpend: 480,
+        unclearOwnershipCount: 0,
       },
       qualityReadiness: "ready",
     });

@@ -10,7 +10,7 @@ export function ClassificationCard({ s }: { s: ClassificationSummary }) {
   ];
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
       <div className="border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Software classification</h2>
         <p className="mt-0.5 text-xs text-zinc-500">
