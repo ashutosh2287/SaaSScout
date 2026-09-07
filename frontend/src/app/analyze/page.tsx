@@ -125,6 +125,17 @@ export default function AnalyzePage() {
             {files.length === 0 ? (
               <>
                 <UploadZone onFile={handleFile} error={error} />
+                <p className="mt-4 text-center text-xs text-ink-3">
+                  No data handy?{" "}
+                  <a
+                    href="/samples/sasscout-sample-6mo.csv"
+                    download
+                    className="font-medium text-ink-2 underline-offset-2 hover:underline"
+                  >
+                    Download a 6-month sample
+                  </a>{" "}
+                  to try the analyzer.
+                </p>
                 {error && (
                   <div
                     role="alert"

@@ -1,0 +1,49 @@
+# Caddyfile for sasscout.
+#
+# Single virtual host, plain HTTP on :80 and HTTPS on :443 once a
+# domain is wired up. Caddy handles the TLS certificate via its
+# on-demand ACME flow; for production, point the host block at the
+# public domain and the cert is provisioned automatically.
+#
+# Reverse proxy the Next standalone server (which we run behind
+# `node server.js` on PORT=3000) and forward /health so uptime checks
+# hit a single endpoint with no application logic.
+
+sasscout.local {
+    encode zstd gzip
+
+    # Strip the default Server header for less fingerprinting. Caddy
+    # will not advertise the version either.
+    header -Server
+
+    # Re-assert the security headers at the edge in case the upstream
+    # is ever fronted by something other than the Next config. The
+    # upstream's headers pass through; this layer adds HSTS.
+    header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    header X-Content-Type-Options "nosniff"
+    header Referrer-Policy "strict-origin-when-cross-origin"
+    header X-Frame-Options "DENY"
+
+    # Health check. The Next app does not own a /health route, so we
+    # answer it here cheaply. If you need a real app-level liveness
+    # probe, add a /health route handler in /app/api/health/route.ts.
+    handle /health {
+        respond "ok" 200
+    }
+
+    # Everything else: forward to the Next standalone server. Caddy
+    # preserves the original Host header so Next can pick up the
+    # correct server name.
+    reverse_proxy localhost:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+# Optional: a debug-only HTTP listener on :80 that issues a redirect to
+# HTTPS in production. Comment out if running on a private network.
+:80 {
+    redir https://{host}{uri} permanent
+}

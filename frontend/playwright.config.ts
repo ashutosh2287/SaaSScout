@@ -7,10 +7,13 @@ import { defineConfig, devices } from "@playwright/test";
 // build of a fresh checkout can be slow.
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // Run E2E serially. The dev server we boot for the test suite is a
+  // single Next process; parallel workers hammering it during the
+  // initial Turbopack compile cause intermittent first-load timeouts
+  // that look like test failures. CI runs with a single worker.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",

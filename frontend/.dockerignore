@@ -1,0 +1,46 @@
+# Build context for the Sasscout frontend.
+# Anything not listed here is sent to the Docker daemon. Keep this
+# aggressive: a tighter context = faster builds + smaller risk of
+# leaking secrets.
+
+# Local artifacts the build never needs.
+.git
+.gitignore
+.github
+.idea
+.vscode
+
+# Build outputs. The builder stage re-produces these.
+.next
+out
+build
+dist
+
+# Test artifacts. Playwright + Vitest write here at runtime.
+test-results
+playwright-report
+coverage
+blob-report
+
+# Docs that are not part of the runtime image.
+*.md
+!README.md
+docs
+
+# Editor / OS noise.
+.DS_Store
+Thumbs.db
+
+# Node / npm — installed explicitly in the builder stage.
+node_modules
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files. Never bake secrets into an image.
+.env
+.env.*
+!.env.example
+
+# Anything the user has explicitly excluded.
+LanceDB
