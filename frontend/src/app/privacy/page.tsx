@@ -43,7 +43,7 @@ export default function PrivacyPage() {
               {privacy.transactionPath.steps.map((s, i) => (
                 <li
                   key={s.title}
-                  className="flex items-start gap-4 rounded-2xl border border-zinc-200 bg-surface p-5 shadow-sm"
+                  className="flex items-start gap-4 border border-line bg-surface p-5"
                 >
                   <span
                     aria-hidden="true"
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
                 </li>
               ))}
             </ol>
-            <p className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-900">
+            <p className="mt-6 rounded-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-900">
               {privacy.transactionPath.note}
             </p>
           </section>
@@ -66,7 +66,7 @@ export default function PrivacyPage() {
           {/* Backend health path — visually separated from transaction data */}
           <section
             aria-labelledby="backend-heading"
-            className="mt-12 rounded-2xl border-2 border-zinc-300 bg-zinc-50 p-6"
+            className="mt-12 rounded-sm border-2 border-zinc-300 bg-zinc-50 p-6"
           >
             <h2 id="backend-heading" className="text-xl font-semibold tracking-tight text-zinc-900">
               {privacy.backend.heading}

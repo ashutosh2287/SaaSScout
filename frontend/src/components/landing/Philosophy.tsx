@@ -35,7 +35,7 @@ export function Philosophy() {
           {tiers.map((t) => (
             <li
               key={t.label}
-              className="flex items-center gap-4 rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm"
+              className="flex items-center gap-4 border border-line bg-surface px-5 py-4"
             >
               <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${t.dot}`} />
               <span className={`w-32 shrink-0 rounded-full px-2.5 py-1 text-center text-xs font-semibold ${t.tone}`}>

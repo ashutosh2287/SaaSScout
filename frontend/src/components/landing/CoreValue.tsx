@@ -27,7 +27,7 @@ export function CoreValue() {
             {sources.map((s) => (
               <div
                 key={s.label}
-                className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-surface px-4 py-4 shadow-sm"
+                className="flex items-center gap-3 border border-line bg-surface px-4 py-4"
               >
                 <span
                   aria-hidden="true"

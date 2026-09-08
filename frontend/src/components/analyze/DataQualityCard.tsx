@@ -14,7 +14,7 @@ const readinessLabel: Record<string, string> = {
 
 export function DataQualityCard({ q }: { q: DataQualityDiagnostics }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
+    <div className="border border-line bg-surface">
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Data quality</h2>
         <div className="flex items-center gap-3">

@@ -5,7 +5,7 @@ import { downloadReportCsv, downloadReportJson } from "@/lib/report/download";
 
 export function ExportCard({ report }: { report: SasscoutReport }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-surface shadow-sm">
+    <div className="border border-line bg-surface">
       <div className="border-b border-zinc-200 px-5 py-4">
         <h2 className="text-sm font-semibold text-zinc-900">Export your analysis</h2>
         <p className="mt-0.5 text-xs text-zinc-500">

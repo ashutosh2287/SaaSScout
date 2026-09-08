@@ -13,6 +13,7 @@ import { RecurringCard } from "@/components/analyze/RecurringCard";
 import { ExportCard } from "@/components/analyze/ExportCard";
 import { SaveAnalysisCard } from "@/components/analyze/SaveAnalysisCard";
 import { CrossSourceBreakdown } from "@/components/analyze/CrossSourceBreakdown";
+import { Reveal } from "@/components/ui/Reveal";
 import { useMerchantDetail } from "@/components/analyze/MerchantDetailView";
 import { categoryLabel, categoryTone } from "@/components/analyze/classificationLabels";
 import { intervalLabel, statusLabel, statusTone } from "@/components/analyze/recurringLabels";
@@ -149,26 +150,26 @@ function PreviewContent({
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+            <div className="border border-line bg-surface px-5 py-4">
                <p className="font-mono text-[11px] text-ink-3">rows found</p>
                <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{totalRows.toLocaleString()}</p>
              </div>
-             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+             <div className="border border-line bg-surface px-5 py-4">
                <p className="font-mono text-[11px] text-ink-3">transactions parsed</p>
                <p className="mt-1 text-2xl font-semibold tracking-tight text-emerald-700">{parsedRows.toLocaleString()}</p>
              </div>
-             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+             <div className="border border-line bg-surface px-5 py-4">
                <p className="font-mono text-[11px] text-ink-3">skipped</p>
                <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">{result.skippedRows.toLocaleString()}</p>
              </div>
-             <div className="rounded-xl border border-zinc-200 bg-surface px-5 py-4 shadow-sm">
+             <div className="border border-line bg-surface px-5 py-4">
                <p className="font-mono text-[11px] text-ink-3">need attention</p>
               <p className="mt-1 text-2xl font-semibold tracking-tight text-amber-700">{attentionCount.toLocaleString()}</p>
             </div>
           </div>
 
           {attentionCount > 0 && (
-            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <div className="mt-6 rounded-sm border border-amber-200 bg-amber-50 px-5 py-4">
               <h2 className="text-sm font-semibold text-amber-900">
                 {attentionCount} transaction{attentionCount === 1 ? "" : "s"} skipped
               </h2>
@@ -191,6 +192,7 @@ function PreviewContent({
             </div>
           )}
 
+          <Reveal>
           <div className="mt-8">
             <DashboardMetrics metrics={view.metrics} currency={result.currency} />
           </div>
@@ -216,6 +218,8 @@ function PreviewContent({
 
           <SoftwareBreakdown rows={view.softwareRows} onInspect={merchantDetail.inspect} currency={result.currency} />
 
+          </Reveal>
+
           <div className="mt-4">
             <DataQualityCard q={quality} />
           </div>
@@ -233,7 +237,7 @@ function PreviewContent({
             </div>
           )}
 
-          <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm">
+          <div className="mt-8 overflow-hidden border border-line bg-surface">
             <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4">
               <h2 className="text-sm font-semibold text-zinc-900">
                 Preview {parsedRows > 0 ? "· first " + preview.length : ""}

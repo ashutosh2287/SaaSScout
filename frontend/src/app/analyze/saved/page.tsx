@@ -89,7 +89,7 @@ export default function SavedAnalysesPage() {
             {state.kind === "loading" && (
               <div
                 role="status"
-                className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center text-sm text-zinc-500 shadow-sm"
+                className="border border-line bg-surface px-5 py-12 text-center text-sm text-ink-2"
               >
                 Loading saved analyses…
               </div>
@@ -98,14 +98,14 @@ export default function SavedAnalysesPage() {
             {state.kind === "error" && (
               <div
                 role="status"
-                className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center text-sm text-zinc-600 shadow-sm"
+                className="border border-line bg-surface px-5 py-12 text-center text-sm text-ink-2"
               >
                 {state.message}
               </div>
             )}
 
             {state.kind === "loaded" && state.items.length === 0 && (
-              <div className="rounded-2xl border border-zinc-200 bg-surface px-5 py-12 text-center shadow-sm">
+              <div className="border border-line bg-surface px-5 py-12 text-center">
                 <p className="text-sm font-medium text-zinc-700">No saved analyses yet.</p>
                 <p className="mt-2 text-sm text-zinc-500">
                   Analyze your spending and save a report to see it here.
@@ -120,7 +120,7 @@ export default function SavedAnalysesPage() {
             )}
 
             {state.kind === "loaded" && state.items.length > 0 && (
-              <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm">
+              <ul className="divide-y divide-zinc-100 overflow-hidden border border-line bg-surface">
                 {state.items.map((item) => {
                   const compatible = schemaCompatible(item);
                   return (
