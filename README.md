@@ -22,30 +22,26 @@ entirely in the browser; transaction data never leaves the device. The backend
 is a minimal Hono API exposing only `GET /health` with a dev-safe CORS
 allow-list and a uniform JSON error envelope.
 
-**Recent work (uncommitted on `main`, labelled Steps 22–25):** comparison
-findings are prioritised by impact with a neutral next-step line, the review
-queue gained a dynamic "Actionable" preset with live chip counts, and the
-compare surface gained a compact aggregate summary band (net annualized change
-+ kind counts, with currency/order-stability guardrails). Reports for these
-steps live in `docs/`.
+**Shipped (committed on `main`):** Steps 22–28 cover the remaining product
+findings — intra-period overlap detection (`possible_overlap`), unclear-ownership
+signals (`unclear_ownership`), and multi-file / cross-source upload with a
+per-source software-spend breakdown. Phase B added a Playwright + axe E2E harness
+(7 specs, CI job). Phase C added a multi-stage Dockerfile, `next.config.ts`
+security headers, a Caddyfile with `/health` and HSTS, a 6-month sample CSV, and
+`docs/deployment-frontend.md`.
 
-**Previously hardened:** performance to 25k rows (sub-second parse → analyze →
-preview), IndexedDB persistence + lifecycle resilience, a11y regression,
-privacy / network-boundary proofs, CI/deploy/reverse-proxy validation, and
-trust language across the UI.
+**Remaining work — premium experience polish (Phase D, ~3–5 days):** design
+system audit, animation system wiring, premium landing copy pass, data viz
+polish, loading/empty/error states, responsive browser QA, production deploy.
+See `docs/STEP-LAUNCH-PLAN.md`.
 
-**Current track — production UI & launch (STEP 0–8):** premium design system,
-animation layer, landing-page transformation, data visualisation, the remaining
-product findings (overlapping tools, unowned vendors, cross-source deduction),
-polished loading/empty/error states, browser QA + accessibility + security,
-then deployment with sample-data onboarding and truthful docs. Auth, database,
-cloud storage, AI/LLM analysis, payments, and telemetry remain deliberate
-non-goals until the post-launch loop justifies them.
+**Deliberately deferred post-launch:** auth, database, cloud storage, AI/LLM
+analysis, payments, and telemetry.
 
-> **Git note:** commits were re-labelled during development; the current tip is
-> labelled "Step 21" and sits above commits labelled "Step 31–37". The working
-> tree carries Steps 22–25 uncommitted. Gate truth: frontend 823 tests (42
-> files), backend 46 tests — all green on lint/tsc/build.
+> **Git note:** commits were re-labelled during development. The current tip is
+> labelled "Phase C" and sits above commits labelled "Step 21–37". Gate truth:
+> frontend 868 tests (45 files), backend 46 tests — all green on lint/tsc/build,
+> plus Playwright 7/7 on a dev server.
 
 ## Project Structure
 
@@ -143,6 +139,8 @@ backend to start, and the backend does not require the frontend to start.
 | Frontend    | `npm run lint`  | Lint                 |
 | Frontend    | `npm run build` | Production build     |
 | Frontend    | `npm test`      | Run unit tests       |
+| Frontend    | `npm run test:e2e` | Run Playwright E2E + axe |
+| Frontend    | `docker build -t sasscout-frontend . && docker run -p 3000:3000 sasscout-frontend` | Build & run the container |
 | Backend     | `npm run dev`   | Start dev server     |
 | Backend     | `npm run typecheck` | Type check        |
 | Backend     | `npm run build` | Compile to `dist/`   |
