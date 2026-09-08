@@ -16,7 +16,11 @@ export const heroSpend = {
   reviewQueue: [
     { kind: "price-change", title: "Adobe", detail: "Price change", tag: "+20%" },
     { kind: "possible-overlap", title: "Slack + Teams", detail: "Possible overlap", tag: "Overlap" },
-    { kind: "new-recurring", title: "Unknown SaaS", detail: "New recurring charge", tag: "$89/month" },
+    // Step 27 — `unclear_ownership` is "recurring software the engine
+    // could not identify by name or pattern", not a "new recurring
+    // charge". The old wording implied a fresh subscription; the
+    // honest read is the opposite — a sustained bill with no owner.
+    { kind: "unclear-ownership", title: "Unknown SaaS", detail: "Recurring charge we can't identify", tag: "Needs your confirmation" },
   ] as ReviewItem[],
 };
 
@@ -45,7 +49,13 @@ export const dashboard = {
       tier: "Needs review" as Tier,
       finding: "Possible overlap between tools",
       vendor: "Slack + Teams",
-      detail: "Both collaboration tools are billed to the same account.",
+      // Step 26 — the engine's honest wording is "both are classified
+      // as team-collaboration software in the current period". The old
+      // line ("billed to the same account") implied a shared payment
+      // source that the engine does not establish; the overlap
+      // detector only looks at subcategory, recurring status, and
+      // interval. The next step is to confirm both are still in use.
+      detail: "Both are classified as team-collaboration software and billed on a recurring cadence in the current period.",
     },
   ] as { id: number; tier: Tier; finding: string; vendor: string; detail: string }[],
 };

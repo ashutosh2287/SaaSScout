@@ -6,6 +6,9 @@ import { useParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { BrandMark } from "@/components/layout/BrandMark";
 import { SavedReportView } from "@/components/analyze/SavedReportView";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Spinner } from "@/components/ui/Spinner";
+import { buttonClasses } from "@/components/ui/Button";
 import { getAnalysis, isReadableSavedAnalysis, PersistenceError, schemaCompatible } from "@/lib/persistence";
 import type { SavedAnalysis } from "@/lib/persistence/types";
 
@@ -69,30 +72,63 @@ export default function SavedAnalysisPage() {
         <main className="px-6 py-16">
           <Container className="max-w-3xl text-center">
             {state.kind === "loading" && (
-              <p role="status" className="text-sm text-ink-3">Loading saved analysis…</p>
+              <div role="status" className="flex flex-col items-center gap-3">
+                <Spinner size="lg" />
+                <p className="text-sm text-ink-3">Loading saved analysis…</p>
+              </div>
             )}
             {state.kind === "missing" && (
-              <>
-                <h1 className="text-2xl font-semibold tracking-tight text-ink">Analysis not found</h1>
-                <p className="mt-3 text-ink-2">This saved analysis could not be found on this device.</p>
-                <Link href="/analyze/saved" className={`mt-6 inline-flex rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-ink shadow-card transition-colors hover:bg-brand-hover`}>
-                  Back to saved analyses
-                </Link>
-              </>
+              <EmptyState
+                icon={
+                  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6" />
+                  </svg>
+                }
+                title="Analysis not found"
+                description="This saved analysis could not be found on this device."
+                action={
+                  <Link href="/analyze/saved" className={buttonClasses("primary", "md")}>
+                    Back to saved analyses
+                  </Link>
+                }
+              />
             )}
             {state.kind === "incompatible" && (
-              <>
-                <h1 className="text-2xl font-semibold tracking-tight text-ink">Can&apos;t open this analysis</h1>
-                <p className="mt-3 text-ink-2">
-                  This saved analysis was created with an older version of Sasscout and can&apos;t be opened.
-                </p>
-                <Link href="/analyze/saved" className={`mt-6 inline-flex rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-ink shadow-card transition-colors hover:bg-brand-hover`}>
-                  Back to saved analyses
-                </Link>
-              </>
+              <EmptyState
+                icon={
+                  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <path d="M12 9v4" />
+                    <path d="M12 17h.01" />
+                  </svg>
+                }
+                title="Can&apos;t open this analysis"
+                description="This saved analysis was created with an older version of Sasscout and can&apos;t be opened. Re-run the analysis from a fresh upload to get a current report."
+                action={
+                  <Link href="/analyze/saved" className={buttonClasses("primary", "md")}>
+                    Back to saved analyses
+                  </Link>
+                }
+              />
             )}
             {state.kind === "error" && (
-              <p role="status" className="text-sm text-ink-2">{state.message}</p>
+              <EmptyState
+                icon={
+                  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 8v4" />
+                    <path d="M12 16h.01" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                }
+                title="Could not open this analysis"
+                description={state.message}
+                action={
+                  <Link href="/analyze" className={buttonClasses("primary", "md")}>
+                    Upload a new file
+                  </Link>
+                }
+              />
             )}
           </Container>
         </main>

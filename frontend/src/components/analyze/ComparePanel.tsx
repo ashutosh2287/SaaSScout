@@ -8,6 +8,9 @@ import type { ComparisonResult } from "@/lib/compare/types";
 import { KIND_LABEL, confidenceLabel, impactLine, suggestedAction, windowText } from "@/lib/compare/format";
 import { prioritizeFindings } from "@/lib/compare/prioritize";
 import { formatSummary, summarizeFindings } from "@/lib/compare/summary";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Spinner } from "@/components/ui/Spinner";
+import { buttonClasses } from "@/components/ui/Button";
 
 type PanelState =
   | { kind: "loading" }
@@ -57,30 +60,44 @@ export function ComparePanel() {
     state.kind === "ready" ? state.items.filter((i) => schemaCompatible(i)) : [];
 
   return (
-    <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
+    <div className="border border-line bg-surface p-6">
       {state.kind === "loading" && (
-        <p role="status" className="text-sm text-zinc-500">
-          Loading saved analyses…
-        </p>
+        <div role="status" className="flex flex-col items-center gap-3 py-8">
+          <Spinner size="lg" />
+          <p className="text-sm text-ink-3">Loading saved analyses…</p>
+        </div>
       )}
       {state.kind === "error" && (
-        <p role="status" className="text-sm text-zinc-600">
+        <p role="status" className="text-sm text-ink-2">
           {state.message}
         </p>
       )}
       {state.kind === "ready" && selectable.length < 2 && (
-        <div>
-          <p className="text-sm font-medium text-zinc-700">Compare two analyses</p>
-          <p className="mt-2 text-sm text-zinc-500">
-            Save and reopen two analyses from different periods, then pick them here to see what changed in your
-            software and recurring spend between the two periods. Everything stays on this device.
-          </p>
-          <p className="mt-4 text-sm text-zinc-500">
-            {selectable.length === 0
-              ? "You have no saved analyses yet."
-              : "You need at least two saved analyses to compare."}
-          </p>
-        </div>
+        <EmptyState
+          icon={
+            <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="M7 14l3-3 3 3 5-5" />
+            </svg>
+          }
+          title="Compare two analyses"
+          description={
+            selectable.length === 0
+              ? "You have no saved analyses yet. Upload a file, save it, then come back here to compare periods."
+              : "You need at least two saved analyses to compare. Save and reopen two analyses from different periods, then pick them here to see what changed in your software and recurring spend between the two periods. Everything stays on this device."
+          }
+          action={
+            selectable.length === 0 ? (
+              <a href="/analyze" className={buttonClasses("primary", "md")}>
+                Upload a file
+              </a>
+            ) : (
+              <a href="/analyze/saved" className={buttonClasses("primary", "md")}>
+                Go to saved analyses
+              </a>
+            )
+          }
+        />
       )}
 
       {state.kind === "ready" && selectable.length >= 2 && (
@@ -171,28 +188,28 @@ function ResultView({
   return (
     <div className="mt-8">
       {result.caution && (
-        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="mb-6 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {result.caution}
         </div>
       )}
 
       <div className="mb-6 grid gap-3 text-sm sm:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+        <div className="rounded-sm border border-line bg-surface px-4 py-3">
           <p className="font-mono text-[11px] text-ink-3">earlier period</p>
-          <p className="mt-1 text-zinc-700">{result.baseline.label}</p>
-          <p className="text-xs text-zinc-500">{windowText(result.baseline.window)}</p>
+          <p className="mt-1 text-ink">{result.baseline.label}</p>
+          <p className="text-xs text-ink-2">{windowText(result.baseline.window)}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+        <div className="rounded-sm border border-line bg-surface px-4 py-3">
           <p className="font-mono text-[11px] text-ink-3">current period</p>
-          <p className="mt-1 text-zinc-700">{result.current.label}</p>
-          <p className="text-xs text-zinc-500">{windowText(result.current.window)}</p>
+          <p className="mt-1 text-ink">{result.current.label}</p>
+          <p className="text-xs text-ink-2">{windowText(result.current.window)}</p>
         </div>
       </div>
 
       {result.findings.length === 0 && (
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-6 text-center">
-          <p className="text-sm font-medium text-zinc-700">No material changes detected</p>
-          <p className="mx-auto mt-1 max-w-xl text-sm text-zinc-500">
+        <div className="rounded-sm border border-line bg-surface px-4 py-6 text-center">
+          <p className="text-sm font-medium text-ink">No material changes detected</p>
+          <p className="mx-auto mt-1 max-w-xl text-sm text-ink-2">
             No software merchant moved enough to report between these two periods: no material price or frequency
             step, and no qualifying new or ended recurring charges. A quiet period is a genuine result.
           </p>
@@ -202,7 +219,7 @@ function ResultView({
       {result.findings.length > 0 && (
         <section
           aria-label="Comparison summary"
-          className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm text-emerald-900"
+          className="mb-4 rounded-sm border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm text-emerald-900"
         >
           <p>{formatSummary(summarizeFindings(result.findings), { currency, currencyMismatch, ordered: result.ordered })}</p>
         </section>
@@ -215,7 +232,7 @@ function ResultView({
               ? `${f.kind}:${f.merchantKey}:${f.pair.merchantKey}`
               : `${f.kind}:${f.merchantKey}`;
             return (
-            <li key={key} className="rounded-xl border border-zinc-200 px-4 py-4">
+            <li key={key} className="rounded-sm border border-line px-4 py-4">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-semibold text-zinc-900">
                   {KIND_LABEL[f.kind]}

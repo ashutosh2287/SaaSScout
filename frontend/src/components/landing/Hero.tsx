@@ -8,6 +8,10 @@ const badgeStyles: Record<string, string> = {
   "price-change": "bg-zinc-100 text-zinc-700",
   "possible-overlap": "bg-zinc-100 text-zinc-700",
   "new-recurring": "bg-emerald-50 text-emerald-700",
+  // Step 27 — `unclear_ownership` is a recurring-software merchant the
+  // classification engine could not identify. It is a "needs your
+  // confirmation" signal, not a "likely fine" one — amber, not green.
+  "unclear-ownership": "bg-amber-50 text-amber-700",
 };
 
 export function Hero() {
